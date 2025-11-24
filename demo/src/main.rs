@@ -21,13 +21,13 @@ mod initiator;
 use ferari::render::RenderableEntity;
 
 /// Logical screen width in pixels.
-const LOGIC_WIDTH: usize = 200;
+pub const LOGIC_WIDTH: usize = 200;
 /// Logical screen height in pixels.
-const LOGIC_HEIGHT: usize = 200;
+pub const LOGIC_HEIGHT: usize = 200;
 /// Tile size in pixels.
-const TILE_SIZE: usize = 16;
+pub const TILE_SIZE: usize = 16;
 /// Upscaling factor for display.
-const UPSCALE: usize = 5;
+pub const UPSCALE: usize = 5;
 
 fn main() {
     // Need to find root directory
@@ -100,7 +100,7 @@ fn main() {
     render.init(&game, &tiles_atlas);
 
     let all_units = {
-        let mut units = vec![state.player.clone()];
+        let mut units = vec![state.player.unit.clone()];
         units.extend(state.mobs.clone());
         units
     };
@@ -120,8 +120,8 @@ fn main() {
         .collect();
 
     render.render_frame(&visible_entities, &camera, &mut back_buffer);
-    state.player.x = camera.center_x;
-    state.player.y = camera.center_y;
+    state.player.unit.x = camera.center_x;
+    state.player.unit.y = camera.center_y;
     // game loop
     while running.load(Ordering::Acquire) {
         time.update();
@@ -142,10 +142,10 @@ fn main() {
             running.store(false, Ordering::Release);
         }
 
-        make_step(&mut state, &input);
+        make_step(&mut state, &input, time.delta);
 
-        camera.center_x = state.player.x;
-        camera.center_y = state.player.y;
+        camera.center_x = state.player.unit.x.floor();
+        camera.center_y = state.player.unit.y.floor();
 
         let units_for_render = get_visible_objects(&state, &camera);
 
@@ -176,7 +176,7 @@ fn main() {
         }
 
         // fps limit
-        thread::sleep(Duration::from_millis(16)); // ~60 FPS
+        thread::sleep(Duration::from_micros(16667)); // ~60 FPS
     }
 
     println!("Main loop exited");

@@ -7,7 +7,7 @@ use crate::assets::GameMap;
 #[derive(Debug, Default)]
 pub struct State {
     /// The player-controlled unit
-    pub player: Unit,
+    pub player: Player,
     /// Collection of all non-player mobile units
     pub mobs: Vec<Unit>,
 }
@@ -44,6 +44,57 @@ impl Unit {
     #[allow(dead_code)]
     pub fn new(x: f32, y: f32, x_speed: f32, y_speed: f32) -> Self {
         Self { x, y, x_speed, y_speed }
+    }
+}
+
+/// Represents the player's state
+#[derive(Debug, Default)]
+pub struct Player {
+    /// Player's data
+    pub unit: Unit,
+    /// State for movement
+    pub movement: PlayerMovement,
+}
+
+/// State for discrete movement
+#[derive(Debug)]
+pub enum PlayerMovement {
+    /// Standing still
+    Idle,
+    /// Moving from one tile to another
+    Moving {
+        start_x: f32,
+        start_y: f32,
+        target_x: f32,
+        target_y: f32,
+        /// Movement progress since starting
+        elapsed_time: f32,
+        /// Total movement time
+        duration: f32,
+    },
+    // Pushing box from one tile to another. same as `Moving`, but with different animation
+    // Pushing {
+    //     start_x: f32,
+    //     start_y: f32,
+    //     target_x: f32,
+    //     target_y: f32,
+    //     /// Movement progress since starting
+    //     elapsed_time: f32,
+    //     /// Total movement time
+    //     duration: f32,
+    // },
+}
+
+// TODO: ?
+impl Default for PlayerMovement {
+    fn default() -> Self {
+        PlayerMovement::Idle
+    }
+}
+
+impl Player {
+    pub fn new(unit: Unit) -> Self {
+        Self { unit: unit, ..Default::default() }
     }
 }
 
@@ -117,7 +168,7 @@ impl State {
             }
         }
 
-        Self { player: player.unwrap(), mobs }
+        Self { player: Player::new(player.unwrap()), mobs }
     }
 }
 
