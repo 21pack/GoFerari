@@ -1,10 +1,10 @@
 import json
 
 grid = (5, 32)
-
-sprite_frame = (256, 256)
-sprite_size = (64, 64)
-sprite_offset = (96, 72)
+s = 2
+sprite_frame = (256 * s, 256 * s)
+sprite_size = (64 * s, 64 * s)
+sprite_offset = (int((256 * s- 64 * s) / 2), 72 * s)
 
 frames_map = {
     "running_se": [[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 0, 0, 0, 0]],
