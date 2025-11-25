@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use minifb::{Key, Window, WindowOptions};
+use minifb::{Key, Menu, Window, WindowOptions};
 
 use crossbeam_channel::bounded;
 
@@ -12,8 +12,6 @@ use crate::behaviour::make_step;
 use crate::initiator::get_visible_objects;
 
 use ferari::assets;
-#[cfg(target_os = "linux")]
-use ferari::draw;
 use ferari::input;
 use ferari::render;
 use ferari::time;
@@ -99,9 +97,12 @@ fn main() {
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
 
     // parse game descr
-    let game_path = project_root.join("examples/input.json");
+    let level1_path = project_root.join("examples/input.json");
+    let level2_path = project_root.join("examples/input_homka.json");
 
-    let game = assets::GameMap::load(game_path).unwrap();
+    let game1 = assets::GameMap::load(level1_path).unwrap();
+    let game2 = assets::GameMap::load(level2_path).unwrap();
+    let mut game = game1.clone();
 
     // init draw
     let input_state = Arc::new(input::InputState::new());
@@ -111,24 +112,6 @@ fn main() {
     // framebuffer (`render <-> draw` connection)
     let mut back_buffer: Vec<u32> = vec![0; LOGIC_WIDTH * LOGIC_HEIGHT];
 
-    #[cfg(target_os = "linux")]
-    {
-        let input_state = input_state.clone();
-        let running = running.clone();
-
-        thread::spawn(move || {
-            draw::run_draw_thread(
-                rx_frame,
-                input_state,
-                running,
-                LOGIC_WIDTH,
-                LOGIC_HEIGHT,
-                UPSCALE,
-            );
-        });
-    }
-
-    #[cfg(target_os = "macos")]
     let mut window = Window::new(
         "Ferari",
         LOGIC_WIDTH * UPSCALE,
@@ -137,39 +120,39 @@ fn main() {
     )
     .unwrap();
 
+    window.set_target_fps(60);
+
+    let mut menu = Menu::new("Edit").unwrap();
+    menu.add_item("Exit", 0).shortcut(Key::Escape, 0).build(); // TODO: click don't work
+
+    let mut sub_menu = Menu::new("Levels").unwrap();
+    sub_menu.add_item("Level 1", 1).build();
+    sub_menu.add_item("Level 2", 2).build();
+    sub_menu.add_item("Level 3", 3).build();
+
+    menu.add_sub_menu("Select Level", &sub_menu);
+    window.add_menu(&menu);
+
     // init time
     let mut time = time::Time::new();
 
     let (mut render, mut camera, mut state) =
         init_level(game, entities_atlas.clone(), tiles_atlas.clone());
 
-    let all_units = {
-        let mut units = vec![state.player.unit.clone()];
-        units.extend(state.mobs.clone());
-        units
-    };
-
-    let visible_entities: Vec<RenderableEntity> = all_units
-        .into_iter()
-        .enumerate()
-        .map(|(i, unit)| {
-            let name_model = if i == 0 { "knight_0" } else { "imp_20" };
-            let period = 0.4;
-            let cycles = (time.total / period).floor() as u32;
-            let animation_num = if cycles.is_multiple_of(2) { "_0" } else { "_1" };
-            let full_name = name_model.to_string() + animation_num;
-
-            RenderableEntity::new(unit.x, unit.y, full_name)
-        })
-        .collect();
-
-    render.render_frame(&visible_entities, &camera, &mut back_buffer);
-    state.player.unit.x = camera.center_x;
-    state.player.unit.y = camera.center_y;
-
     // game loop
     while running.load(Ordering::Acquire) {
-        #[cfg(target_os = "macos")]
+        if let Some(id) = window.is_menu_pressed() {
+            if id == 1 {
+                game = game1.clone();
+            } else if id == 2 {
+                game = game2.clone();
+            } else {
+                continue;
+            }
+
+            (render, camera, state) = init_level(game, entities_atlas.clone(), tiles_atlas.clone());
+        }
+
         window_main_loop!(window, running, rx_frame, input_state, LOGIC_WIDTH, LOGIC_HEIGHT);
 
         time.update();

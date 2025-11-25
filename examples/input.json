@@ -3153,8 +3153,8 @@
   },
   "mobs": {
     "player": {
-      "x_start": 0,
-      "y_start": 0,
+      "x_start": 400,
+      "y_start": 400,
       "asset": "knight_0_0",
       "is_player": true,
       "behaviour": {
