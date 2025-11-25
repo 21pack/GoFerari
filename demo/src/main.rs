@@ -21,13 +21,13 @@ mod initiator;
 use ferari::render::RenderableEntity;
 
 /// Logical screen width in pixels.
-pub const LOGIC_WIDTH: usize = 200;
+pub const LOGIC_WIDTH: usize = 400;
 /// Logical screen height in pixels.
-pub const LOGIC_HEIGHT: usize = 200;
+pub const LOGIC_HEIGHT: usize = 300;
 /// Tile size in pixels.
-pub const TILE_SIZE: usize = 16;
+pub const TILE_SIZE: usize = 256;
 /// Upscaling factor for display.
-pub const UPSCALE: usize = 5;
+pub const UPSCALE: usize = 2;
 
 fn main() {
     // Need to find root directory
@@ -109,13 +109,13 @@ fn main() {
         .into_iter()
         .enumerate()
         .map(|(i, unit)| {
-            let name_model = if i == 0 { "knight_0" } else { "imp_20" };
-            let period = 0.4;
-            let cycles = (time.total / period).floor() as u32;
-            let animation_num = if cycles.is_multiple_of(2) { "_0" } else { "_1" };
-            let full_name = name_model.to_string() + animation_num;
+            let name_model = if i == 0 { "running_se" } else { "pushing_se" };
+                let frame_count = if name_model == "running_se" { 13 } else { 20 };
+                let period = 0.1;
+                let cycles = (time.total / period).floor() as u32;
+                let full_name = format!("{}_{}", name_model, cycles % frame_count);
 
-            RenderableEntity::new(unit.x, unit.y, full_name)
+                RenderableEntity::new(unit.x, unit.y, full_name)
         })
         .collect();
 
@@ -158,11 +158,11 @@ fn main() {
             .into_iter()
             .enumerate()
             .map(|(i, unit)| {
-                let name_model = if i == 0 { "knight_0" } else { "imp_20" };
-                let period = 0.4;
+                let name_model = if i == 0 { "running_se" } else { "pushing_se" };
+                let frame_count = if name_model == "running_se" { 13 } else { 20 };
+                let period = 0.1;
                 let cycles = (time.total / period).floor() as u32;
-                let animation_num = if cycles.is_multiple_of(2) { "_0" } else { "_1" };
-                let full_name = name_model.to_string() + animation_num;
+                let full_name = format!("{}_{}", name_model, cycles % frame_count);
 
                 RenderableEntity::new(unit.x, unit.y, full_name)
             })

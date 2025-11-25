@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "demo_map",
-    "tile_size": 16,
+    "tile_size": 256,
     "size": [
       25,
       25
@@ -3138,82 +3138,22 @@
     "obj_1": {
       "x": 2,
       "y": 1,
-      "asset": "cactus_long_3_9"
+      "asset": "box_0_0"
     },
     "obj_2": {
       "x": 4,
       "y": 14,
-      "asset": "fence_rising_11_10"
-    },
-    "obj_3": {
-      "x": 8,
-      "y": 15,
-      "asset": "fence_falling_10_10"
+      "asset": "wall_0_1"
     }
   },
   "mobs": {
     "player": {
       "x_start": 0,
       "y_start": 0,
-      "asset": "knight_0_0",
+      "asset": "running_se_0",
       "is_player": true,
       "behaviour": {
         "type": "controlled"
-      }
-    },
-    "mob_4": {
-      "x_start": 420,
-      "y_start": 470,
-      "asset": "imp_20_0",
-      "is_player": false,
-      "behaviour": {
-        "type": "walker",
-        "direction": "left",
-        "speed": 0.5
-      }
-    },
-    "mob_5": {
-      "x_start": 493,
-      "y_start": 470,
-      "asset": "imp_20_0",
-      "is_player": false,
-      "behaviour": {
-        "type": "walker",
-        "direction": "left",
-        "speed": 0.5
-      }
-    },
-    "mob_6": {
-      "x_start": 540,
-      "y_start": 470,
-      "asset": "imp_20_0",
-      "is_player": false,
-      "behaviour": {
-        "type": "walker",
-        "direction": "left",
-        "speed": 0.5
-      }
-    },
-    "mob_1": {
-      "x_start": 440,
-      "y_start": 470,
-      "asset": "imp_20_0",
-      "is_player": false,
-      "behaviour": {
-        "type": "walker",
-        "direction": "left",
-        "speed": 0.5
-      }
-    },
-    "mob_2": {
-      "x_start": 400,
-      "y_start": 460,
-      "asset": "ghost_30_0",
-      "is_player": false,
-      "behaviour": {
-        "type": "walker",
-        "direction": "right",
-        "speed": 0.42
       }
     }
   }
