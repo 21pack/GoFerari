@@ -110,18 +110,17 @@ fn main() {
         .enumerate()
         .map(|(i, unit)| {
             let name_model = if i == 0 { "running_se" } else { "pushing_se" };
-                let frame_count = if name_model == "running_se" { 13 } else { 20 };
-                let period = 0.1;
-                let cycles = (time.total / period).floor() as u32;
-                let full_name = format!("{}_{}", name_model, cycles % frame_count);
+            let frame_count = if name_model == "running_se" { 13 } else { 20 };
+            let period = 0.1;
+            let cycles = (time.total / period).floor() as u32;
+            let full_name = format!("{}_{}", name_model, cycles % frame_count);
 
-                RenderableEntity::new(unit.x, unit.y, full_name)
+            RenderableEntity::new(unit.pixel_x, unit.pixel_y, full_name)
         })
         .collect();
 
     render.render_frame(&visible_entities, &camera, &mut back_buffer);
-    state.player.unit.x = camera.center_x;
-    state.player.unit.y = camera.center_y;
+
     // game loop
     while running.load(Ordering::Acquire) {
         time.update();
@@ -142,10 +141,10 @@ fn main() {
             running.store(false, Ordering::Release);
         }
 
-        make_step(&mut state, &input, time.delta);
+        make_step(&mut state, &input, time.delta, &game);
 
-        camera.center_x = state.player.unit.x.floor();
-        camera.center_y = state.player.unit.y.floor();
+        camera.center_x = state.player.unit.pixel_x.floor();
+        camera.center_y = state.player.unit.pixel_y.floor();
 
         let units_for_render = get_visible_objects(&state, &camera);
 
@@ -164,7 +163,7 @@ fn main() {
                 let cycles = (time.total / period).floor() as u32;
                 let full_name = format!("{}_{}", name_model, cycles % frame_count);
 
-                RenderableEntity::new(unit.x, unit.y, full_name)
+                RenderableEntity::new(unit.pixel_x, unit.pixel_y, full_name)
             })
             .collect();
 

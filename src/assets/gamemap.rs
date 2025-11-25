@@ -65,6 +65,22 @@ pub struct JsonObject {
     pub shadow: bool,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub enum TileType {
+    #[serde(rename = "empty")]
+    Empty,
+    #[serde(rename = "wall")]
+    Wall,
+    #[serde(rename = "target")]
+    Target,
+}
+
+impl Default for TileType {
+    fn default() -> Self {
+        TileType::Empty
+    }
+}
+
 /// Tile data from JSON.
 #[derive(Deserialize, Debug, Clone)]
 pub struct JsonTile {
@@ -74,6 +90,9 @@ pub struct JsonTile {
     pub y: u32,
     /// Asset identifier for the tile's appearance
     pub asset: String,
+
+    #[serde(default)]
+    pub tile_type: TileType,
 }
 
 /// Meta information about the game map from JSON.
@@ -179,6 +198,7 @@ pub struct Tile {
     pub y: u32,
     /// Asset identifier for the tile's appearance
     pub asset: String,
+    pub tile_type: TileType,
 }
 
 /// Game map, as parsed and ready to use.
@@ -197,6 +217,7 @@ pub struct GameMap {
     pub objects: HashMap<String, Object>,
     /// Mapping of tiles' names to their definitions
     pub tiles: HashMap<String, Tile>,
+    pub walk_map: Vec<TileType>,
 }
 
 // ============================
@@ -256,9 +277,22 @@ impl GameMap {
 
         let mut tiles = HashMap::new();
         for (name, tile_data) in map_json.tiles {
-            let tile =
-                Tile { name: name.clone(), x: tile_data.x, y: tile_data.y, asset: tile_data.asset };
+            let tile = Tile {
+                name: name.clone(),
+                x: tile_data.x,
+                y: tile_data.y,
+                asset: tile_data.asset,
+                tile_type: tile_data.tile_type,
+            };
             tiles.insert(name, tile);
+        }
+
+        let width = map_json.meta.size[0] as usize;
+        let height = map_json.meta.size[1] as usize;
+        let mut walk_map = vec![TileType::Empty; width * height];
+        for tile in tiles.values() {
+            let idx = tile.y as usize * width + tile.x as usize;
+            walk_map[idx] = tile.tile_type.clone();
         }
 
         Ok(GameMap {
@@ -268,6 +302,7 @@ impl GameMap {
             mobs,
             objects,
             tiles,
+            walk_map,
         })
     }
 
@@ -370,6 +405,18 @@ impl GameMap {
     #[allow(dead_code)]
     pub fn iter_tiles(&self) -> impl Iterator<Item = &Tile> {
         self.tiles.values()
+    }
+
+    pub fn is_walkable(&self, target_x: i32, target_y: i32) -> bool {
+        let width = self.size[0] as i32;
+        let height = self.size[1] as i32;
+
+        if target_x < 0 || target_y < 0 || target_x >= width || target_y >= height {
+            return false;
+        }
+
+        let idx = (target_y as usize) * (width as usize) + (target_x as usize);
+        !matches!(self.walk_map[idx], TileType::Wall)
     }
 }
 

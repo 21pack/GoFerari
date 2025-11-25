@@ -18,10 +18,14 @@ pub struct State {
 /// a position in 2D space and speed components for movement simulation.
 #[derive(Debug, Clone, Default)]
 pub struct Unit {
-    /// X-coordinate position in the game world
-    pub x: f32,
-    /// Y-coordinate position in the game world
-    pub y: f32,
+    /// Pixel coordinates (for animation)
+    pub pixel_x: f32,
+    pub pixel_y: f32,
+
+    /// Logical coordinates (tile-based)
+    pub tile_x: i32,
+    pub tile_y: i32,
+
     /// Horizontal movement speed
     pub x_speed: f32,
     /// Vertical movement speed
@@ -42,8 +46,15 @@ impl Unit {
     ///
     /// A new `Unit` instance with the specified properties.
     #[allow(dead_code)]
-    pub fn new(x: f32, y: f32, x_speed: f32, y_speed: f32) -> Self {
-        Self { x, y, x_speed, y_speed }
+    pub fn new(
+        pixel_x: f32,
+        pixel_y: f32,
+        tile_x: i32,
+        tile_y: i32,
+        x_speed: f32,
+        y_speed: f32,
+    ) -> Self {
+        Self { pixel_x, pixel_y, tile_x, tile_y, x_speed, y_speed }
     }
 }
 
@@ -98,6 +109,29 @@ impl Player {
     }
 }
 
+fn tile_to_world_buf_pos(
+    tile_x: i32,
+    tile_y: i32,
+    tile_size: u32,
+    world_width: u32,
+    world_height: u32,
+) -> (f32, f32) {
+    let ts = tile_size as i32;
+    let ww = world_width as i32;
+    let wh = world_height as i32;
+
+    let offset_x = ww / 2;
+    let offset_y = wh / 2 - ts;
+
+    let x = (tile_x - tile_y) * (ts / 2) + offset_x;
+    let y = (tile_x + tile_y) * (ts / 4) + offset_y - (ts / 2);
+
+    let center_x = x + ts / 2;
+    let center_y = y;
+
+    (center_x as f32, center_y as f32)
+}
+
 impl State {
     /// Creates a new `State` by getting unit data from a `GameMap`.
     ///
@@ -129,11 +163,24 @@ impl State {
         let mut player: Option<Unit> = None;
         let mut mobs: Vec<Unit> = Vec::new();
 
+        let world_width = game_map.size[0] * game_map.tile_size * 2;
+        let world_height = game_map.size[1] * game_map.tile_size * 2;
+
         for mob in game_map.iter_mobs() {
+            let (world_x, world_y) = tile_to_world_buf_pos(
+                mob.x_start as i32,
+                mob.y_start as i32,
+                game_map.tile_size,
+                world_width,
+                world_height,
+            );
+
             if mob.is_player {
                 player = Some(Unit {
-                    x: mob.x_start as f32,
-                    y: mob.y_start as f32,
+                    pixel_x: world_x,
+                    pixel_y: world_y,
+                    tile_x: mob.x_start as i32,
+                    tile_y: mob.y_start as i32,
                     x_speed: 10.,
                     y_speed: 10.,
                 });
@@ -145,8 +192,10 @@ impl State {
                 let mob_speed = beh.speed.unwrap_or(0.0);
 
                 mobs.push(Unit {
-                    x: mob.x_start as f32,
-                    y: mob.y_start as f32,
+                    pixel_x: world_x,
+                    pixel_y: world_y,
+                    tile_x: mob.x_start as i32,
+                    tile_y: mob.y_start as i32,
                     x_speed: match mob_direction {
                         "right" => mob_speed,
                         "left" => -mob_speed,
@@ -160,8 +209,10 @@ impl State {
                 });
             } else {
                 mobs.push(Unit {
-                    x: mob.x_start as f32,
-                    y: mob.y_start as f32,
+                    pixel_x: world_x,
+                    pixel_y: world_y,
+                    tile_x: mob.x_start as i32,
+                    tile_y: mob.y_start as i32,
                     x_speed: 0.0,
                     y_speed: 0.0,
                 });
