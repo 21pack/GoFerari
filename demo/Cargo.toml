@@ -4,5 +4,6 @@ version = "1.0.2"
 edition = "2021"
 
 [dependencies]
+minifb = "0.28"
 ferari = { path = "../src" }
 crossbeam-channel = "0.5.15"
