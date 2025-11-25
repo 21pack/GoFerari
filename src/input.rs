@@ -62,10 +62,13 @@ impl InputState {
     ///
     /// * `window` - A reference to the minifb `Window` to query for key states
     pub fn update(&self, window: &Window) {
-        self.up.store(window.is_key_down(Key::W), Ordering::Relaxed);
-        self.down.store(window.is_key_down(Key::S), Ordering::Relaxed);
-        self.left.store(window.is_key_down(Key::A), Ordering::Relaxed);
-        self.right.store(window.is_key_down(Key::D), Ordering::Relaxed);
+        self.up.store(window.is_key_down(Key::W) || window.is_key_down(Key::Up), Ordering::Relaxed);
+        self.down
+            .store(window.is_key_down(Key::S) || window.is_key_down(Key::Down), Ordering::Relaxed);
+        self.left
+            .store(window.is_key_down(Key::A) || window.is_key_down(Key::Left), Ordering::Relaxed);
+        self.right
+            .store(window.is_key_down(Key::D) || window.is_key_down(Key::Right), Ordering::Relaxed);
         self.escape.store(window.is_key_down(Key::Escape), Ordering::Relaxed);
     }
 
