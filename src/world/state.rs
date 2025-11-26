@@ -8,67 +8,16 @@ use crate::assets::GameMap;
 pub struct State {
     /// The player-controlled unit
     pub player: Player,
+
     /// Collection of all non-player mobile units
     pub mobs: Vec<Unit>,
-}
 
-/// Represents a unit entity in the game world with position and movement capabilities.
-///
-/// Units can be either player-controlled or game-controlled mobs. Each unit has
-/// a position in 2D space and speed components for movement simulation.
-#[derive(Debug, Clone, Default)]
-pub struct Unit {
-    /// Pixel coordinates (for animation)
-    pub pixel_x: f32,
-    pub pixel_y: f32,
+    /// 1D vector representing the 2D map. Stores the index of the mob
+    /// within `self.mobs` that currently occupies the tile, or `None`
+    pub mob_grid: Vec<Option<usize>>,
 
-    /// Logical coordinates (tile-based)
-    pub tile_x: i32,
-    pub tile_y: i32,
-
-    /// Horizontal movement speed
-    pub x_speed: f32,
-    /// Vertical movement speed
-    pub y_speed: f32,
-}
-
-impl Unit {
-    /// Creates a new `Unit` with the specified position and movement parameters.
-    ///
-    /// # Arguments
-    ///
-    /// * `pixel_x` - Initial X-coordinate position
-    /// * `pixel_x` - Initial Y-coordinate position
-    /// * `tile_x` - Initial tile-based X-coordinate position
-    /// * `tile_y` - Initial tile-based Y-coordinate position
-    /// * `x_speed` - Initial horizontal movement speed
-    /// * `y_speed` - Initial vertical movement speed
-    ///
-    /// # Returns
-    ///
-    /// A new `Unit` instance with the specified properties.
-    #[allow(dead_code)]
-    pub fn new(
-        pixel_x: f32,
-        pixel_y: f32,
-        tile_x: i32,
-        tile_y: i32,
-        x_speed: f32,
-        y_speed: f32,
-    ) -> Self {
-        Self { pixel_x, pixel_y, tile_x, tile_y, x_speed, y_speed }
-    }
-}
-
-/// Represents the player's state
-#[derive(Debug, Default)]
-pub struct Player {
-    /// Player's data
-    pub unit: Unit,
-    /// State for movement
-    pub movement: PlayerMovement,
-    /// Current facing direction
-    pub direction: Direction,
+    /// Width of the game map (in tiles), used for calculating 1D index from 2D coordinates
+    pub grid_width: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -96,11 +45,12 @@ impl Default for Direction {
     }
 }
 
-/// State for discrete movement
-#[derive(Debug)]
-pub enum PlayerMovement {
+/// State for discrete movement and animation.
+#[derive(Debug, Clone)]
+pub enum UnitMovement {
     /// Standing still
     Idle,
+
     /// Moving from one tile to another
     Moving {
         /// Initial position
@@ -116,12 +66,17 @@ pub enum PlayerMovement {
         /// Total movement time
         duration: f32,
     },
+
     /// Pushing box from one tile to another. same as `Moving`, but with different animation
     Pushing {
+        /// Initial position
         start_x: f32,
         start_y: f32,
+
+        /// Target position
         target_x: f32,
         target_y: f32,
+
         /// Movement progress since starting
         elapsed_time: f32,
         /// Total movement time
@@ -129,16 +84,75 @@ pub enum PlayerMovement {
     },
 }
 
-// TODO: ?
-impl Default for PlayerMovement {
+impl Default for UnitMovement {
     fn default() -> Self {
-        PlayerMovement::Idle
+        Self::Idle
     }
+}
+
+/// Represents a unit entity in the game world with position and movement capabilities.
+///
+/// Units can be either player-controlled or game-controlled mobs. Each unit has
+/// a position in 2D space and speed components for movement simulation.
+#[derive(Debug, Default, Clone)]
+pub struct Unit {
+    /// Pixel coordinates (for animation)
+    pub pixel_x: f32,
+    pub pixel_y: f32,
+
+    /// Logical coordinates (tile-based)
+    pub tile_x: i32,
+    pub tile_y: i32,
+
+    /// Horizontal movement speed
+    pub x_speed: f32,
+    /// Vertical movement speed
+    pub y_speed: f32,
+
+    /// State for movement
+    pub movement: UnitMovement,
+    /// Current facing direction
+    pub direction: Direction,
+}
+
+impl Unit {
+    /// Creates a new `Unit` with the specified position and movement parameters.
+    ///
+    /// # Arguments
+    ///
+    /// * `pixel_x` - Initial X-coordinate position
+    /// * `pixel_x` - Initial Y-coordinate position
+    /// * `tile_x` - Initial tile-based X-coordinate position
+    /// * `tile_y` - Initial tile-based Y-coordinate position
+    /// * `x_speed` - Initial horizontal movement speed
+    /// * `y_speed` - Initial vertical movement speed
+    ///
+    /// # Returns
+    ///
+    /// A new `Unit` instance with the specified properties.
+    #[allow(dead_code)]
+    pub fn new(
+        pixel_x: f32,
+        pixel_y: f32,
+        tile_x: i32,
+        tile_y: i32,
+        x_speed: f32,
+        y_speed: f32,
+    ) -> Self {
+        Self { pixel_x, pixel_y, tile_x, tile_y, x_speed, y_speed, ..Default::default() }
+    }
+}
+
+/// Represents the player's state. Primarily wraps a `Unit`.
+#[derive(Debug, Default)]
+pub struct Player {
+    /// Player's data
+    pub unit: Unit,
 }
 
 impl Player {
     pub fn new(unit: Unit) -> Self {
-        Self { unit: unit, ..Default::default() }
+        Self { unit: unit }
     }
 }
 
@@ -201,60 +215,114 @@ impl State {
         let world_width = game_map.size[0] * game_map.tile_size * 2;
         let world_height = game_map.size[1] * game_map.tile_size * 2;
 
-        for mob in game_map.iter_mobs() {
+        for mob_data in game_map.iter_mobs() {
             let (world_x, world_y) = tile_to_world_buf_pos(
-                mob.x_start as i32,
-                mob.y_start as i32,
+                mob_data.x_start as i32,
+                mob_data.y_start as i32,
                 game_map.tile_size,
                 world_width,
                 world_height,
             );
 
-            if mob.is_player {
-                player = Some(Unit {
-                    pixel_x: world_x,
-                    pixel_y: world_y,
-                    tile_x: mob.x_start as i32,
-                    tile_y: mob.y_start as i32,
-                    x_speed: 10.,
-                    y_speed: 10.,
-                });
+            let mut unit = Unit {
+                pixel_x: world_x,
+                pixel_y: world_y,
+                tile_x: mob_data.x_start as i32,
+                tile_y: mob_data.y_start as i32,
+                ..Default::default()
+            };
+
+            if mob_data.is_player {
+                unit.x_speed = 10.0;
+                unit.y_speed = 10.0;
+                player = Some(unit);
                 continue;
             }
 
-            if let Some(beh) = &mob.behaviour {
+            if let Some(beh) = &mob_data.behaviour {
                 let mob_direction = beh.direction.as_deref().unwrap_or("none");
                 let mob_speed = beh.speed.unwrap_or(0.0);
 
-                mobs.push(Unit {
-                    pixel_x: world_x,
-                    pixel_y: world_y,
-                    tile_x: mob.x_start as i32,
-                    tile_y: mob.y_start as i32,
-                    x_speed: match mob_direction {
-                        "right" => mob_speed,
-                        "left" => -mob_speed,
-                        _ => 0.0,
-                    },
-                    y_speed: match mob_direction {
-                        "up" => -mob_speed,
-                        "down" => mob_speed,
-                        _ => 0.0,
-                    },
-                });
-            } else {
-                mobs.push(Unit {
-                    pixel_x: world_x,
-                    pixel_y: world_y,
-                    tile_x: mob.x_start as i32,
-                    tile_y: mob.y_start as i32,
-                    x_speed: 0.0,
-                    y_speed: 0.0,
-                });
+                match mob_direction {
+                    "right" => unit.x_speed = mob_speed,
+                    "left" => unit.x_speed = -mob_speed,
+                    "up" => unit.y_speed = -mob_speed,
+                    "down" => unit.y_speed = mob_speed,
+                    _ => {}
+                }
+            }
+
+            mobs.push(unit);
+        }
+
+        let width = game_map.size[0] as usize;
+        let height = game_map.size[1] as usize;
+        let grid_width = width as i32;
+
+        let mut mob_grid = vec![None; width * height];
+
+        for (i, unit) in mobs.iter().enumerate() {
+            let idx = (unit.tile_y * grid_width + unit.tile_x) as usize;
+            mob_grid[idx] = Some(i);
+        }
+
+        Self { player: Player::new(player.unwrap()), mobs, mob_grid, grid_width }
+    }
+
+    /// Updates the `mob_grid` to reflect a mob's movement from one tile to another.
+    ///
+    /// # Arguments
+    ///
+    /// * `mob_index` - The index of the mob being moved within `self.mobs`.
+    /// * `old_x` - The tile X-coordinate of the mob's starting position.
+    /// * `old_y` - The tile Y-coordinate of the mob's starting position.
+    /// * `new_x` - The tile X-coordinate of the mob's destination position.
+    /// * `new_y` - The tile Y-coordinate of the mob's destination position.
+    pub fn update_mob_pos(
+        &mut self,
+        mob_index: usize,
+        old_x: i32,
+        old_y: i32,
+        new_x: i32,
+        new_y: i32,
+    ) {
+        let old_idx = (old_y * self.grid_width + old_x) as usize;
+        let new_idx = (new_y * self.grid_width + new_x) as usize;
+
+        if let Some(current_idx) = self.mob_grid.get(old_idx) {
+            if *current_idx == Some(mob_index) {
+                self.mob_grid[old_idx] = None;
             }
         }
 
-        Self { player: Player::new(player.unwrap()), mobs }
+        if new_idx < self.mob_grid.len() {
+            self.mob_grid[new_idx] = Some(mob_index);
+        }
+    }
+
+    /// Retrieves the index of the mob occupying the given tile coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - Target tile X-coordinate
+    /// * `y` - Target tile Y-coordinate
+    ///
+    /// # Returns
+    ///
+    /// `Some(index)` if a mob is present at `(x, y)`.
+    /// Returns `None` if the tile is empty or if the provided
+    /// coordinates are out of the map bounds.
+    pub fn get_mob_at(&self, x: i32, y: i32) -> Option<usize> {
+        if x < 0 || y < 0 {
+            return None;
+        }
+
+        let idx = (y * self.grid_width + x) as usize;
+        if idx < self.mob_grid.len() {
+            self.mob_grid[idx]
+        } else {
+            None
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::world::{Camera, Unit};
 
-use ferari::world::{Player, PlayerMovement, State};
+use ferari::world::{Player, State, UnitMovement};
 
 /// Returns a list of game objects that are currently visible within the camera's view.
 ///
@@ -31,13 +31,13 @@ pub fn lerp(a: f32, b: f32, t: f32) -> f32 {
 }
 
 pub fn get_player_sprite(player: &Player, total_time: f64) -> String {
-    let (prefix, total_frames, period) = match player.movement {
-        PlayerMovement::Moving { .. } => ("running", 13, 62.0 / 1000.0),
-        PlayerMovement::Pushing { .. } => ("pushing", 20, 83.0 / 1000.0),
-        PlayerMovement::Idle => ("idle", 22, 83.0 / 1000.0),
+    let (prefix, total_frames, period) = match player.unit.movement {
+        UnitMovement::Moving { .. } => ("running", 13, 62.0 / 1000.0),
+        UnitMovement::Pushing { .. } => ("pushing", 20, 83.0 / 1000.0),
+        UnitMovement::Idle => ("idle", 22, 83.0 / 1000.0),
     };
 
-    let dir_suffix = player.direction.as_str();
+    let dir_suffix = player.unit.direction.as_str();
 
     let cycles = (total_time / period).floor() as u32;
     let frame_idx = cycles % total_frames;

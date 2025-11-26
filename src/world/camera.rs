@@ -20,7 +20,7 @@ impl Camera {
     /// # Arguments
     ///
     /// * `center_x` - The x-coordinate of the camera's center position
-    /// * `center_y` - The y-coordinate of the camera's center position  
+    /// * `center_y` - The y-coordinate of the camera's center position
     /// * `width` - The width of the camera's viewport in pixels
     /// * `height` - The height of the camera's viewport in pixels
     ///
