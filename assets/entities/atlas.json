@@ -1323,7 +1323,7 @@
     },
     "meta": {
         "image": "atlas.png",
-        "tile_size": 512,
+        "tile_size": 256,
         "version": 1
     }
 }

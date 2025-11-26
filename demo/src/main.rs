@@ -160,7 +160,7 @@ fn main() {
                 let sprite_name = if i == 0 {
                     get_player_sprite(&state.player, time.total as f64)
                 } else {
-                    "pushing_se_0".to_string()
+                    "box".to_string()
                 };
 
                 RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)

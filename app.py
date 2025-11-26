@@ -4,8 +4,6 @@ s = 2
 sprite_frame = (256 * s, 256 * s)
 sprite_size = (64 * s, 64 * s)
 sprite_offset = (int((256 * s - 64 * s) / 2), 72 * s)
-# sprite_size = (128 * s, 128 * s)
-# sprite_offset = (64 * s, 64 * s)
 
 frames_map = {
     "idle_se": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 0, 0, 0]],
