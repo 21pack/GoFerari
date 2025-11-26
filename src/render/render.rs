@@ -223,7 +223,8 @@ impl Render {
                 }
 
                 let color = self.entity_atlas.image.get_pixel(src_x as u32, src_y as u32);
-                if color[3] == 0 {
+                let src_a = color[3] as u32;
+                if src_a == 0 {
                     continue;
                 }
 
@@ -255,11 +256,27 @@ impl Render {
                 }
 
                 let [r, g, b, _] = color.0;
-                let r = (r as f32 * brightness) as u32;
-                let g = (g as f32 * brightness) as u32;
-                let b = (b as f32 * brightness) as u32;
+                let src_r = (r as f32 * brightness) as u32;
+                let src_g = (g as f32 * brightness) as u32;
+                let src_b = (b as f32 * brightness) as u32;
 
-                buf[dest_idx] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                let dst_pixel = buf[dest_idx];
+
+                let dst_r = (dst_pixel >> 16) & 0xFF;
+                let dst_g = (dst_pixel >> 8) & 0xFF;
+                let dst_b = dst_pixel & 0xFF;
+
+                let alpha_factor = src_a as f32 / 255.0;
+                let inv_alpha_factor = 1.0 - alpha_factor;
+
+                let new_r = (src_r as f32 * alpha_factor + dst_r as f32 * inv_alpha_factor)
+                    .min(255.0) as u32;
+                let new_g = (src_g as f32 * alpha_factor + dst_g as f32 * inv_alpha_factor)
+                    .min(255.0) as u32;
+                let new_b = (src_b as f32 * alpha_factor + dst_b as f32 * inv_alpha_factor)
+                    .min(255.0) as u32;
+
+                buf[dest_idx] = (0xFF << 24) | (new_r << 16) | (new_g << 8) | new_b;
             }
         }
     }

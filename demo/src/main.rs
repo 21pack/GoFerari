@@ -25,7 +25,7 @@ pub const LOGIC_WIDTH: usize = 400;
 /// Logical screen height in pixels.
 pub const LOGIC_HEIGHT: usize = 300;
 /// Tile size in pixels.
-pub const TILE_SIZE: usize = 128;
+pub const TILE_SIZE: usize = 256;
 /// Upscaling factor for display.
 pub const UPSCALE: usize = 2;
 
