@@ -21,13 +21,13 @@ mod initiator;
 use ferari::render::RenderableEntity;
 
 /// Logical screen width in pixels.
-pub const LOGIC_WIDTH: usize = 400;
+pub const LOGIC_WIDTH: usize = 800;
 /// Logical screen height in pixels.
-pub const LOGIC_HEIGHT: usize = 300;
+pub const LOGIC_HEIGHT: usize = 600;
 /// Tile size in pixels.
 pub const TILE_SIZE: usize = 256;
 /// Upscaling factor for display.
-pub const UPSCALE: usize = 2;
+pub const UPSCALE: usize = 1;
 
 fn main() {
     // Need to find root directory

@@ -271,7 +271,7 @@
     "tile_53": {
       "x": 2,
       "y": 2,
-      "asset": "floor"
+      "asset": "target"
     },
     "tile_54": {
       "x": 3,
@@ -3137,7 +3137,7 @@
   "objects": {
     "obj_2": {
       "x": 1,
-      "y": 3,
+      "y": 6,
       "asset": "wall",
       "collidable": true
     }

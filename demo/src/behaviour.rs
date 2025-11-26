@@ -49,6 +49,7 @@ pub fn make_step(
     game: &ferari::assets::GameMap,
 ) {
     const MOVE_DURATION: f32 = 0.3;
+    const BOX_DRAG: f32 = 2.5;
 
     let map_width = game.size[0] as usize;
 
@@ -230,7 +231,7 @@ pub fn make_step(
                 target_x: target_bx,
                 target_y: target_by,
                 elapsed_time: 0.0,
-                duration: MOVE_DURATION,
+                duration: MOVE_DURATION * BOX_DRAG,
             };
 
             box_unit.tile_x = behind_tx;
@@ -249,7 +250,7 @@ pub fn make_step(
                 target_x: target_px,
                 target_y: target_py,
                 elapsed_time: 0.0,
-                duration: MOVE_DURATION,
+                duration: MOVE_DURATION * BOX_DRAG,
             };
             player.tile_x = next_tx;
             player.tile_y = next_ty;

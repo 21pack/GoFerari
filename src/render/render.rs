@@ -186,7 +186,7 @@ impl Render {
                 let screen_x =
                     (entity.x as i32 - camera.center_x as i32) + camera.width as i32 / 2 - fw / 2;
                 let screen_y =
-                    (entity.y as i32 - camera.center_y as i32) + camera.height as i32 / 2 - fh / 2;
+                    (entity.y as i32 - camera.center_y as i32) + camera.height as i32 / 2 - fh;
 
                 self.render_shadow_unit(frame, screen_x, screen_y, buf, camera);
                 self.render_unit(frame, screen_x, screen_y, buf, camera);

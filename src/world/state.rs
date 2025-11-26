@@ -175,8 +175,10 @@ fn tile_to_world_buf_pos(
     let x = (tile_x - tile_y) * (ts / 2) + offset_x;
     let y = (tile_x + tile_y) * (ts / 4) + offset_y - (ts / 2);
 
+    let todo_remove_me = ts / 8;
+
     let center_x = x + ts / 2;
-    let center_y = y;
+    let center_y = y + ts / 4 + todo_remove_me;
 
     (center_x as f32, center_y as f32)
 }
