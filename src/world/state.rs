@@ -37,8 +37,10 @@ impl Unit {
     ///
     /// # Arguments
     ///
-    /// * `x` - Initial X-coordinate position
-    /// * `y` - Initial Y-coordinate position
+    /// * `pixel_x` - Initial X-coordinate position
+    /// * `pixel_x` - Initial Y-coordinate position
+    /// * `tile_x` - Initial tile-based X-coordinate position
+    /// * `tile_y` - Initial tile-based Y-coordinate position
     /// * `x_speed` - Initial horizontal movement speed
     /// * `y_speed` - Initial vertical movement speed
     ///
@@ -101,10 +103,14 @@ pub enum PlayerMovement {
     Idle,
     /// Moving from one tile to another
     Moving {
+        /// Initial position
         start_x: f32,
         start_y: f32,
+
+        /// Target position
         target_x: f32,
         target_y: f32,
+
         /// Movement progress since starting
         elapsed_time: f32,
         /// Total movement time
@@ -136,6 +142,8 @@ impl Player {
     }
 }
 
+/// Converts tile coordinates to pixel coordinates of the tile center
+/// in the world buffer coordinate system.
 fn tile_to_world_buf_pos(
     tile_x: i32,
     tile_y: i32,
@@ -252,105 +260,107 @@ impl State {
 
 #[cfg(test)]
 mod state_tests {
-    use crate::assets::{Behaviour, BehaviourType, GameMap, Mob};
+    use crate::assets::{Behaviour, BehaviourType, GameMap, Mob, TileType};
     use crate::world::State;
 
-    // fn make_test_map() -> GameMap {
-    //     let mut mobs = std::collections::HashMap::new();
+    fn make_test_map() -> GameMap {
+        let mut mobs = std::collections::HashMap::new();
 
-    //     mobs.insert(
-    //         "player".to_string(),
-    //         Mob {
-    //             name: "player".to_string(),
-    //             x_start: 0,
-    //             y_start: 0,
-    //             asset: "knight".to_string(),
-    //             is_player: true,
-    //             behaviour: None,
-    //         },
-    //     );
+        mobs.insert(
+            "player".to_string(),
+            Mob {
+                name: "player".to_string(),
+                x_start: 0,
+                y_start: 0,
+                asset: "knight".to_string(),
+                is_player: true,
+                behaviour: None,
+            },
+        );
 
-    //     mobs.insert(
-    //         "mob_right".to_string(),
-    //         Mob {
-    //             name: "mob_right".to_string(),
-    //             x_start: 10,
-    //             y_start: 0,
-    //             asset: "imp".to_string(),
-    //             is_player: false,
-    //             behaviour: Some(Behaviour {
-    //                 behaviour_type: BehaviourType::Walker,
-    //                 direction: Some("right".to_string()),
-    //                 speed: Some(1.0),
-    //             }),
-    //         },
-    //     );
+        mobs.insert(
+            "mob_right".to_string(),
+            Mob {
+                name: "mob_right".to_string(),
+                x_start: 10,
+                y_start: 0,
+                asset: "imp".to_string(),
+                is_player: false,
+                behaviour: Some(Behaviour {
+                    behaviour_type: BehaviourType::Walker,
+                    direction: Some("right".to_string()),
+                    speed: Some(1.0),
+                }),
+            },
+        );
 
-    //     mobs.insert(
-    //         "mob_up".to_string(),
-    //         Mob {
-    //             name: "mob_up".to_string(),
-    //             x_start: 0,
-    //             y_start: 10,
-    //             asset: "ghost".to_string(),
-    //             is_player: false,
-    //             behaviour: Some(Behaviour {
-    //                 behaviour_type: BehaviourType::Walker,
-    //                 direction: Some("up".to_string()),
-    //                 speed: Some(0.5),
-    //             }),
-    //         },
-    //     );
+        mobs.insert(
+            "mob_up".to_string(),
+            Mob {
+                name: "mob_up".to_string(),
+                x_start: 0,
+                y_start: 10,
+                asset: "ghost".to_string(),
+                is_player: false,
+                behaviour: Some(Behaviour {
+                    behaviour_type: BehaviourType::Walker,
+                    direction: Some("up".to_string()),
+                    speed: Some(0.5),
+                }),
+            },
+        );
 
-    //     GameMap {
-    //         name: "test_map".to_string(),
-    //         tile_size: 16,
-    //         size: [5, 5],
-    //         mobs,
-    //         objects: std::collections::HashMap::new(),
-    //         tiles: std::collections::HashMap::new(),
-    //     }
-    // }
+        GameMap {
+            name: "test_map".to_string(),
+            tile_size: 16,
+            size: [5, 5],
+            mobs,
+            objects: std::collections::HashMap::new(),
+            tiles: std::collections::HashMap::new(),
+            walk_map: vec![TileType::Empty; 25],
+        }
+    }
 
-    // #[test]
-    // fn test_state_new_creates_player_and_mobs() {
-    //     let map = make_test_map();
-    //     let state = State::new(&map);
+    #[test]
+    fn test_state_new_creates_player_and_mobs() {
+        let map = make_test_map();
+        let state = State::new(&map);
 
-    //     assert_eq!(state.player.x, 0.0);
-    //     assert_eq!(state.player.y, 0.0);
-    //     assert_eq!(state.player.x_speed, 10.0);
-    //     assert_eq!(state.player.y_speed, 10.0);
+        assert_eq!(state.player.unit.tile_x, 0);
+        assert_eq!(state.player.unit.tile_y, 0);
+        assert_eq!(state.player.unit.x_speed, 10.0);
+        assert_eq!(state.player.unit.y_speed, 10.0);
 
-    //     assert_eq!(state.mobs.len(), 2);
+        assert_eq!(state.mobs.len(), 2);
 
-    //     let mob_right = state.mobs.iter().find(|m| m.x_speed > 0.0).unwrap();
-    //     assert_eq!(mob_right.x_speed, 1.0);
-    //     assert_eq!(mob_right.y_speed, 0.0);
-    //     assert_eq!(mob_right.x, 10.0);
-    //     assert_eq!(mob_right.y, 0.0);
+        let mob_right = state.mobs.iter().find(|m| m.x_speed > 0.0).unwrap();
+        assert_eq!(mob_right.x_speed, 1.0);
+        assert_eq!(mob_right.y_speed, 0.0);
+        assert_eq!(mob_right.tile_x, 10);
+        assert_eq!(mob_right.tile_y, 0);
 
-    //     let mob_up = state.mobs.iter().find(|m| m.y_speed < 0.0).unwrap();
-    //     assert_eq!(mob_up.x_speed, 0.0);
-    //     assert_eq!(mob_up.y_speed, -0.5);
-    //     assert_eq!(mob_up.x, 0.0);
-    //     assert_eq!(mob_up.y, 10.0);
-    // }
+        let mob_up = state.mobs.iter().find(|m| m.y_speed < 0.0).unwrap();
+        assert_eq!(mob_up.x_speed, 0.0);
+        assert_eq!(mob_up.y_speed, -0.5);
+        assert_eq!(mob_up.tile_x, 0);
+        assert_eq!(mob_up.tile_y, 10);
+    }
 
-    // #[test]
-    // fn test_state_with_no_mobs_other_than_player() {
-    //     let mut map = make_test_map();
-    //     map.mobs.retain(|_, mob| mob.is_player);
-    //     let state = State::new(&map);
+    #[test]
+    fn test_state_with_no_mobs_other_than_player() {
+        let mut map = make_test_map();
+        map.mobs.retain(|_, mob| mob.is_player);
+        let state = State::new(&map);
 
-    //     assert_eq!(state.player.x, 0.0);
-    //     assert_eq!(state.player.y, 0.0);
-    //     assert!(state.mobs.is_empty());
-    // }
+        assert_eq!(state.player.unit.tile_x, 0);
+        assert_eq!(state.player.unit.tile_y, 0);
+        assert!(state.mobs.is_empty());
+    }
 
     #[test]
     fn test_mob_with_unknown_or_none_behaviour_defaults_to_zero_speed() {
         let mut mobs = std::collections::HashMap::new();
+
         mobs.insert(
             "player".to_string(),
             Mob {
@@ -396,27 +406,28 @@ mod state_tests {
             mobs,
             objects: std::collections::HashMap::new(),
             tiles: std::collections::HashMap::new(),
+            walk_map: vec![TileType::Empty; 25],
         };
 
         let state = State::new(&map);
         assert_eq!(state.mobs.len(), 2);
 
-        let mob_none = state.mobs.iter().find(|m| m.x == 5.0).unwrap();
+        let mob_none = state.mobs.iter().find(|m| m.tile_x == 5 && m.tile_y == 5).unwrap();
         assert_eq!(mob_none.x_speed, 0.0);
         assert_eq!(mob_none.y_speed, 0.0);
 
-        let mob_unknown = state.mobs.iter().find(|m| m.x == 10.0).unwrap();
+        let mob_unknown = state.mobs.iter().find(|m| m.tile_x == 10 && m.tile_y == 10).unwrap();
         assert_eq!(mob_unknown.x_speed, -2.0);
         assert_eq!(mob_unknown.y_speed, 0.0);
     }
 
-    // #[test]
-    // fn test_player_position_does_not_change_from_map() {
-    //     let map = make_test_map();
-    //     let state = State::new(&map);
+    #[test]
+    fn test_player_position_does_not_change_from_map() {
+        let map = make_test_map();
+        let state = State::new(&map);
 
-    //     let player_map = map.get_mob("player").unwrap();
-    //     assert_eq!(state.player.x, player_map.x_start as f32);
-    //     assert_eq!(state.player.y, player_map.y_start as f32);
-    // }
+        let player_map = map.get_mob("player").unwrap();
+        assert_eq!(state.player.unit.tile_x, player_map.x_start as i32);
+        assert_eq!(state.player.unit.tile_y, player_map.y_start as i32);
+    }
 }

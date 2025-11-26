@@ -65,12 +65,16 @@ pub struct JsonObject {
     pub shadow: bool,
 }
 
+/// Tile type that defines its properties in game logic.
 #[derive(Deserialize, Debug, Clone)]
 pub enum TileType {
+    /// Passable empty tile
     #[serde(rename = "empty")]
     Empty,
+    /// Impenetrable wall
     #[serde(rename = "wall")]
     Wall,
+    /// Target point
     #[serde(rename = "target")]
     Target,
 }
@@ -91,6 +95,7 @@ pub struct JsonTile {
     /// Asset identifier for the tile's appearance
     pub asset: String,
 
+    /// Logical tile type (default is `Empty`)
     #[serde(default)]
     pub tile_type: TileType,
 }
@@ -198,6 +203,7 @@ pub struct Tile {
     pub y: u32,
     /// Asset identifier for the tile's appearance
     pub asset: String,
+    /// Logical type of tile
     pub tile_type: TileType,
 }
 
@@ -407,6 +413,16 @@ impl GameMap {
         self.tiles.values()
     }
 
+    /// Checks whether the tile with coordinates `(target_x, target_y)` is passable.
+    ///
+    /// # Arguments
+    ///
+    /// * `target_x`, `target_y` - tile coordinates
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the tile is within the map bounds and is not a wall.
+    /// * `false` — otherwise.
     pub fn is_walkable(&self, target_x: i32, target_y: i32) -> bool {
         let width = self.size[0] as i32;
         let height = self.size[1] as i32;

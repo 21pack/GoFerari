@@ -55,8 +55,15 @@ impl InputState {
 
     /// Updates the input state by querying the current key states from the window.
     ///
-    /// This method checks the current state of the tracked keys (W, A, S, D, Escape)
-    /// in the provided window and updates the internal values accordingly.
+    /// This method checks the current state of movement and control keys in the provided
+    /// window and updates the internal atomic flags accordingly. Both `WASD` and `arrow keys`
+    /// are supported for directional input:
+    /// - Up: `W` or `↑`
+    /// - Down: `S` or `↓`
+    /// - Left: `A` or `←`
+    /// - Right: `D` or `→`
+    ///
+    /// The Escape key is used for pausing or exiting the game.
     ///
     /// # Parameters
     ///
