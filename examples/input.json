@@ -3135,10 +3135,22 @@
     }
   },
   "objects": {
-    "obj_2": {
+    "obj_1": {
       "x": 1,
-      "y": 6,
-      "asset": "wall",
+      "y": 4,
+      "asset": "wall_tile",
+      "collidable": true
+    },
+    "obj_2": {
+      "x": 2,
+      "y": 4,
+      "asset": "wall_tile",
+      "collidable": true
+    },
+    "obj_3": {
+      "x": 3,
+      "y": 3,
+      "asset": "wall_tile",
       "collidable": true
     }
   },
@@ -3152,25 +3164,25 @@
         "type": "controlled"
       }
     },
-    "obj_1": {
-      "x_start": 0,
+    "mob_1": {
+      "x_start": 10,
       "y_start": 0,
       "asset": "box",
       "is_player": false
     },
-    "obj_3": {
+    "mob_2": {
       "x_start": 3,
       "y_start": 1,
       "asset": "box",
       "is_player": false
     },
-    "obj_4": {
+    "mob_3": {
       "x_start": 4,
       "y_start": 1,
       "asset": "box",
       "is_player": false
     },
-    "obj_5": {
+    "mob_4": {
       "x_start": 6,
       "y_start": 4,
       "asset": "box",

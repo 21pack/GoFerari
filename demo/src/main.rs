@@ -99,27 +99,25 @@ fn main() {
     // prerender
     render.init(&game, &tiles_atlas);
 
-    let all_units = {
-        let mut units = vec![state.player.unit.clone()];
-        units.extend(state.mobs.clone());
-        units
-    };
-
-    let visible_entities: Vec<RenderableEntity> = all_units
-        .into_iter()
-        .enumerate()
-        .map(|(i, unit)| {
-            let name_model = if i == 0 { "running_se" } else { "pushing_se" };
-            let frame_count = if name_model == "running_se" { 13 } else { 20 };
-            let period = 0.1;
-            let cycles = (time.total / period).floor() as u32;
-            let full_name = format!("{}_{}", name_model, cycles % frame_count);
-
-            RenderableEntity::new(unit.pixel_x, unit.pixel_y, full_name)
-        })
-        .collect();
-
-    render.render_frame(&visible_entities, &camera, &mut back_buffer);
+    // TODO: don't need? 
+    // let all_units = {
+    //     let mut units = vec![state.player.unit.clone()];
+    //     units.extend(state.mobs.clone());
+    //     units
+    // };
+    // let visible_entities: Vec<RenderableEntity> = all_units
+    //     .into_iter()
+    //     .enumerate()
+    //     .map(|(i, unit)| {
+    //         let name_model = if i == 0 { "running_se" } else { "pushing_se" };
+    //         let frame_count = if name_model == "running_se" { 13 } else { 20 };
+    //         let period = 0.1;
+    //         let cycles = (time.total / period).floor() as u32;
+    //         let full_name = format!("{}_{}", name_model, cycles % frame_count);
+    //         RenderableEntity::new(unit.pixel_x, unit.pixel_y, full_name)
+    //     })
+    //     .collect();
+    // render.render_frame(&visible_entities, &camera, &mut back_buffer);
 
     // game loop
     while running.load(Ordering::Acquire) {
