@@ -7,7 +7,7 @@ use std::time::Duration;
 use crossbeam_channel::bounded;
 
 use crate::behaviour::make_step;
-use crate::initiator::get_visible_objects;
+use crate::initiator::{get_player_sprite, get_visible_objects};
 
 use ferari::assets;
 use ferari::draw;
@@ -25,7 +25,7 @@ pub const LOGIC_WIDTH: usize = 400;
 /// Logical screen height in pixels.
 pub const LOGIC_HEIGHT: usize = 300;
 /// Tile size in pixels.
-pub const TILE_SIZE: usize = 256;
+pub const TILE_SIZE: usize = 128;
 /// Upscaling factor for display.
 pub const UPSCALE: usize = 2;
 
@@ -157,13 +157,13 @@ fn main() {
             .into_iter()
             .enumerate()
             .map(|(i, unit)| {
-                let name_model = if i == 0 { "running_se" } else { "pushing_se" };
-                let frame_count = if name_model == "running_se" { 13 } else { 20 };
-                let period = 0.1;
-                let cycles = (time.total / period).floor() as u32;
-                let full_name = format!("{}_{}", name_model, cycles % frame_count);
+                let sprite_name = if i == 0 {
+                    get_player_sprite(&state.player, time.total as f64)
+                } else {
+                    "pushing_se_0".to_string()
+                };
 
-                RenderableEntity::new(unit.pixel_x, unit.pixel_y, full_name)
+                RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)
             })
             .collect();
 

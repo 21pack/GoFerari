@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "demo_map",
-    "tile_size": 256,
+    "tile_size": 128,
     "size": [
       25,
       25
@@ -11,7 +11,7 @@
     "tile_1": {
       "x": 0,
       "y": 0,
-      "asset": "floor"
+      "asset": "target"
     },
     "tile_2": {
       "x": 1,
@@ -141,7 +141,7 @@
     "tile_27": {
       "x": 1,
       "y": 1,
-      "asset": "floor"
+      "asset": "target"
     },
     "tile_28": {
       "x": 2,
@@ -3126,7 +3126,7 @@
     "tile_624": {
       "x": 23,
       "y": 24,
-      "asset": "target"
+      "asset": "floor"
     },
     "tile_625": {
       "x": 24,
@@ -3141,8 +3141,8 @@
       "asset": "box"
     },
     "obj_2": {
-      "x": 4,
-      "y": 14,
+      "x": 1,
+      "y": 3,
       "asset": "wall"
     },
     "obj_3": {
@@ -3160,7 +3160,6 @@
       "y": 4,
       "asset": "box"
     }
-
   },
   "mobs": {
     "player": {

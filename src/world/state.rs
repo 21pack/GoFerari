@@ -65,6 +65,33 @@ pub struct Player {
     pub unit: Unit,
     /// State for movement
     pub movement: PlayerMovement,
+    /// Current facing direction
+    pub direction: Direction,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Direction {
+    NE, // North East (Up)
+    SE, // South East (Right)
+    SW, // South West (Down)
+    NW, // North West (Left)
+}
+
+impl Direction {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Direction::NE => "ne",
+            Direction::SE => "se",
+            Direction::SW => "sw",
+            Direction::NW => "nw",
+        }
+    }
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Direction::SE
+    }
 }
 
 /// State for discrete movement
@@ -83,17 +110,17 @@ pub enum PlayerMovement {
         /// Total movement time
         duration: f32,
     },
-    // Pushing box from one tile to another. same as `Moving`, but with different animation
-    // Pushing {
-    //     start_x: f32,
-    //     start_y: f32,
-    //     target_x: f32,
-    //     target_y: f32,
-    //     /// Movement progress since starting
-    //     elapsed_time: f32,
-    //     /// Total movement time
-    //     duration: f32,
-    // },
+    /// Pushing box from one tile to another. same as `Moving`, but with different animation
+    Pushing {
+        start_x: f32,
+        start_y: f32,
+        target_x: f32,
+        target_y: f32,
+        /// Movement progress since starting
+        elapsed_time: f32,
+        /// Total movement time
+        duration: f32,
+    },
 }
 
 // TODO: ?

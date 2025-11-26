@@ -1,6 +1,6 @@
 use crate::{initiator::lerp, input::InputSnapshot, TILE_SIZE};
 
-use ferari::world::{PlayerMovement, State};
+use ferari::world::{Direction, PlayerMovement, State};
 
 // TODO: rm?
 // /// Calculates the absolute value (length) of a 2D vector.
@@ -51,99 +51,125 @@ pub fn make_step(
     const MOVE_DURATION: f32 = 0.3;
 
     let player = &mut curr_state.player;
+    let mut finished_moving = false;
 
-    match &mut player.movement {
-        PlayerMovement::Idle => {
-            let (mut dx, mut dy) = (0, 0);
+    if let PlayerMovement::Moving { start_x, start_y, target_x, target_y, elapsed_time, duration } =
+        &mut player.movement
+    {
+        *elapsed_time += delta;
+        let progress = (*elapsed_time / *duration).min(1.0);
 
-            if input_state.right {
-                dx = 1;
-                dy = 0;
-            } else if input_state.left {
-                dx = -1;
-                dy = 0;
-            } else if input_state.up {
-                dx = 0;
-                dy = -1;
-            } else if input_state.down {
-                dx = 0;
-                dy = 1;
-            }
+        player.unit.pixel_x = lerp(*start_x, *target_x, progress);
+        player.unit.pixel_y = lerp(*start_y, *target_y, progress);
 
-            if dx == 0 && dy == 0 {
-                return;
-            }
+        if progress >= 1.0 {
+            player.unit.pixel_x = *target_x;
+            player.unit.pixel_y = *target_y;
 
-            let next_tx = player.unit.tile_x + dx;
-            let next_ty = player.unit.tile_y + dy;
-
-            if !game.is_walkable(next_tx, next_ty) {
-                return;
-            }
-
-            let step_x = (TILE_SIZE as f32) * 0.5;
-            let step_y = (TILE_SIZE as f32) * 0.25;
-
-            let mut target_px = player.unit.pixel_x;
-            let mut target_py = player.unit.pixel_y;
-
-            match (dx, dy) {
-                (1, 0) => {
-                    // right
-                    target_px += step_x;
-                    target_py += step_y;
-                }
-                (-1, 0) => {
-                    // left
-                    target_px -= step_x;
-                    target_py -= step_y;
-                }
-                (0, -1) => {
-                    // up
-                    target_px += step_x;
-                    target_py -= step_y;
-                }
-                (0, 1) => {
-                    // down
-                    target_px -= step_x;
-                    target_py += step_y;
-                }
-                _ => {}
-            }
-
-            player.movement = PlayerMovement::Moving {
-                start_x: player.unit.pixel_x,
-                start_y: player.unit.pixel_y,
-                target_x: target_px,
-                target_y: target_py,
-                elapsed_time: 0.0,
-                duration: MOVE_DURATION,
-            };
-
-            player.unit.tile_x = next_tx;
-            player.unit.tile_y = next_ty;
+            finished_moving = true;
         }
-        PlayerMovement::Moving { start_x, start_y, target_x, target_y, elapsed_time, duration } => {
-            *elapsed_time += delta;
-            let progress = (*elapsed_time / *duration).min(1.0);
+    }
 
-            player.unit.pixel_x = lerp(*start_x, *target_x, progress);
-            player.unit.pixel_y = lerp(*start_y, *target_y, progress);
+    if let PlayerMovement::Pushing {
+        start_x,
+        start_y,
+        target_x,
+        target_y,
+        elapsed_time,
+        duration,
+    } = &mut player.movement
+    {
+        *elapsed_time += delta;
+        let progress = (*elapsed_time / *duration).min(1.0);
 
-            if progress >= 1.0 {
-                player.unit.pixel_x = *target_x;
-                player.unit.pixel_y = *target_y;
+        player.unit.pixel_x = lerp(*start_x, *target_x, progress);
+        player.unit.pixel_y = lerp(*start_y, *target_y, progress);
 
-                player.movement = PlayerMovement::Idle;
+        if progress >= 1.0 {
+            player.unit.pixel_x = *target_x;
+            player.unit.pixel_y = *target_y;
+
+            finished_moving = true;
+        }
+    }
+
+    if finished_moving {
+        player.movement = PlayerMovement::Idle;
+    }
+
+    if let PlayerMovement::Idle = &mut player.movement {
+        let (mut dx, mut dy) = (0, 0);
+
+        if input_state.right {
+            dx = 1;
+            dy = 0;
+            player.direction = Direction::SE;
+        } else if input_state.left {
+            dx = -1;
+            dy = 0;
+            player.direction = Direction::NW;
+        } else if input_state.up {
+            dx = 0;
+            dy = -1;
+            player.direction = Direction::NE;
+        } else if input_state.down {
+            dx = 0;
+            dy = 1;
+            player.direction = Direction::SW;
+        }
+
+        if dx == 0 && dy == 0 {
+            return;
+        }
+
+        let next_tx = player.unit.tile_x + dx;
+        let next_ty = player.unit.tile_y + dy;
+
+        if !game.is_walkable(next_tx, next_ty) {
+            return;
+        }
+
+        let step_x = (TILE_SIZE as f32) * 0.5;
+        let step_y = (TILE_SIZE as f32) * 0.25;
+
+        let mut target_px = player.unit.pixel_x;
+        let mut target_py = player.unit.pixel_y;
+
+        match (dx, dy) {
+            (1, 0) => {
+                // right
+                target_px += step_x;
+                target_py += step_y;
             }
-        } // PlayerMovement::Pushing {
-          //     start_x,
-          //     start_y,
-          //     target_x,
-          //     target_y,
-          //     elapsed_time,
-          //     duration,
-          // } => todo!(),
+            (-1, 0) => {
+                // left
+                target_px -= step_x;
+                target_py -= step_y;
+            }
+            (0, -1) => {
+                // up
+                target_px += step_x;
+                target_py -= step_y;
+            }
+            (0, 1) => {
+                // down
+                target_px -= step_x;
+                target_py += step_y;
+            }
+            _ => {}
+        }
+
+        player.movement = PlayerMovement::Moving {
+            start_x: player.unit.pixel_x,
+            start_y: player.unit.pixel_y,
+            target_x: target_px,
+            target_y: target_py,
+            elapsed_time: 0.0,
+            duration: MOVE_DURATION,
+        };
+
+        player.unit.tile_x = next_tx;
+        player.unit.tile_y = next_ty;
     }
 }
 
