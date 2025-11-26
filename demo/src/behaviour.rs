@@ -48,10 +48,40 @@ pub fn make_step(
     delta: f32,
     game: &ferari::assets::GameMap,
 ) {
-    const MOVE_DURATION: f32 = 0.3;
-    const BOX_DRAG: f32 = 2.5;
+    const MOVE_DURATION: f32 = 0.6;
+    const PRE_PUSH_DURATION: f32 = 0.8;
+    const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
+    const BOX_MOVE_DURATION: f32 = 3.3;
+    const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
 
     let map_width = game.size[0] as usize;
+
+    // Helper to returns (x, y) offset for a specific direction and magnitude. magnitude = 1.0 is one tile
+    let get_offset = |dir_x: i32, dir_y: i32, magnitude: f32| -> (f32, f32) {
+        let tile_w = TILE_SIZE as f32;
+        let tile_h = (TILE_SIZE as f32) * 0.5;
+
+        let step_x = tile_w * 0.5 * magnitude;
+        let step_y = tile_h * 0.5 * magnitude;
+
+        match (dir_x, dir_y) {
+            (1, 0) => (step_x, step_y),
+            (-1, 0) => (-step_x, -step_y),
+            (0, -1) => (step_x, -step_y),
+            (0, 1) => (-step_x, step_y),
+            _ => (0.0, 0.0),
+        }
+    };
+
+    // Helper to map enum Direction to (dx, dy)
+    let get_dir_delta = |dir: Direction| -> (i32, i32) {
+        match dir {
+            Direction::SE => (1, 0),
+            Direction::NW => (-1, 0),
+            Direction::NE => (0, -1),
+            Direction::SW => (0, 1),
+        }
+    };
 
     // ============================================
     // ANIMATION UPDATE (player + all mobs)
@@ -59,6 +89,10 @@ pub fn make_step(
 
     // Player update
     let mut player_is_busy = false;
+
+    // Walking between phases of approaching or going back to box/tile.
+    let mut transition_to_push: Option<(usize, i32, i32, i32, i32, i32, i32)> = None;
+    let mut transition_to_post: Option<(f32, f32, f32, f32)> = None;
     {
         let unit = &mut curr_state.player.unit;
         match &mut unit.movement {
@@ -69,8 +103,138 @@ pub fn make_step(
                 target_y,
                 elapsed_time,
                 duration,
+            } => {
+                *elapsed_time += delta;
+                let progress = (*elapsed_time / *duration).min(1.0);
+                unit.pixel_x = lerp(*start_x, *target_x, progress);
+                unit.pixel_y = lerp(*start_y, *target_y, progress);
+
+                if progress >= 1.0 {
+                    unit.pixel_x = *target_x;
+                    unit.pixel_y = *target_y;
+                    unit.movement = UnitMovement::Idle;
+                } else {
+                    player_is_busy = true;
+                }
             }
-            | UnitMovement::Pushing {
+            UnitMovement::PrePushing {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+                box_idx,
+                player_next_tx,
+                player_next_ty,
+                box_next_tx,
+                box_next_ty,
+                push_dx,
+                push_dy,
+            } => {
+                *elapsed_time += delta;
+                let progress = (*elapsed_time / *duration).min(1.0);
+                unit.pixel_x = lerp(*start_x, *target_x, progress);
+                unit.pixel_y = lerp(*start_y, *target_y, progress);
+
+                if progress >= 1.0 {
+                    transition_to_push = Some((
+                        *box_idx,
+                        *player_next_tx,
+                        *player_next_ty,
+                        *box_next_tx,
+                        *box_next_ty,
+                        *push_dx,
+                        *push_dy,
+                    ));
+                    unit.pixel_x = *target_x;
+                    unit.pixel_y = *target_y;
+                    player_is_busy = true;
+                } else {
+                    player_is_busy = true;
+                }
+            }
+
+            UnitMovement::Pushing {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+                recoil_target_x,
+                recoil_target_y,
+            } => {
+                *elapsed_time += delta;
+                let progress = (*elapsed_time / *duration).min(1.0);
+                unit.pixel_x = lerp(*start_x, *target_x, progress);
+                unit.pixel_y = lerp(*start_y, *target_y, progress);
+
+                if progress >= 1.0 {
+                    unit.pixel_x = *target_x;
+                    unit.pixel_y = *target_y;
+
+                    let (dx, dy) = get_dir_delta(unit.direction);
+
+                    // 1. Check if user is still holding the correct key
+                    let continuing_input = match unit.direction {
+                        Direction::SE => input_state.right,
+                        Direction::NW => input_state.left,
+                        Direction::NE => input_state.up,
+                        Direction::SW => input_state.down,
+                    };
+
+                    let mut can_continue = false;
+
+                    if continuing_input {
+                        let current_p_tx = unit.tile_x;
+                        let current_p_ty = unit.tile_y;
+
+                        let next_box_tx = current_p_tx + (dx * 2);
+                        let next_box_ty = current_p_ty + (dy * 2);
+
+                        let next_p_tx = current_p_tx + dx;
+                        let next_p_ty = current_p_ty + dy;
+
+                        let walkable = game.is_walkable(next_box_tx, next_box_ty)
+                            && !game.has_collidable_object_at(next_box_tx, next_box_ty);
+
+                        let next_box_idx =
+                            (next_box_ty as usize) * map_width + (next_box_tx as usize);
+                        let mob_blocking =
+                            curr_state.mob_grid.get(next_box_idx).copied().flatten().is_some();
+
+                        if walkable && !mob_blocking {
+                            let current_box_pos_idx =
+                                (next_p_ty as usize) * map_width + (next_p_tx as usize);
+
+                            if let Some(box_idx) = curr_state.mob_grid[current_box_pos_idx] {
+                                can_continue = true;
+                                transition_to_push = Some((
+                                    box_idx,
+                                    next_p_tx,
+                                    next_p_ty,
+                                    next_box_tx,
+                                    next_box_ty,
+                                    dx,
+                                    dy,
+                                ));
+                            }
+                        }
+                    }
+
+                    if !can_continue {
+                        transition_to_post =
+                            Some((*target_x, *target_y, *recoil_target_x, *recoil_target_y));
+                    }
+
+                    player_is_busy = true;
+                } else {
+                    player_is_busy = true;
+                }
+            }
+
+            UnitMovement::PostPushing {
                 start_x,
                 start_y,
                 target_x,
@@ -80,7 +244,6 @@ pub fn make_step(
             } => {
                 *elapsed_time += delta;
                 let progress = (*elapsed_time / *duration).min(1.0);
-
                 unit.pixel_x = lerp(*start_x, *target_x, progress);
                 unit.pixel_y = lerp(*start_y, *target_y, progress);
 
@@ -94,6 +257,76 @@ pub fn make_step(
             }
             UnitMovement::Idle => {}
         }
+    }
+
+    if let Some((box_idx, p_tx, p_ty, b_tx, b_ty, dx, dy)) = transition_to_push {
+        player_is_busy = true;
+
+        let old_box_idx = (p_ty as usize) * map_width + (p_tx as usize);
+        let new_box_idx = (b_ty as usize) * map_width + (b_tx as usize);
+
+        if curr_state.mob_grid[old_box_idx] == Some(box_idx) {
+            curr_state.mob_grid[old_box_idx] = None;
+            curr_state.mob_grid[new_box_idx] = Some(box_idx);
+
+            let box_unit = &mut curr_state.mobs[box_idx];
+            let (bx, by) = (box_unit.pixel_x, box_unit.pixel_y);
+            let (offset_x, offset_y) = get_offset(dx, dy, 1.0);
+            let (target_bx, target_by) = (bx + offset_x, by + offset_y);
+
+            box_unit.movement = UnitMovement::Moving {
+                start_x: bx,
+                start_y: by,
+                target_x: target_bx,
+                target_y: target_by,
+                elapsed_time: 0.0,
+                duration: BOX_MOVE_DURATION,
+            };
+            box_unit.tile_x = b_tx;
+            box_unit.tile_y = b_ty;
+
+            let (over_x, over_y) = get_offset(dx, dy, 0.5);
+            let push_target_x = bx + over_x;
+            let push_target_y = by + over_y;
+
+            let settle_x = bx;
+            let settle_y = by;
+
+            let player = &mut curr_state.player.unit;
+            player.movement = UnitMovement::Pushing {
+                start_x: player.pixel_x,
+                start_y: player.pixel_y,
+                target_x: push_target_x,
+                target_y: push_target_y,
+                elapsed_time: 0.0,
+                duration: PUSH_DURATION,
+                recoil_target_x: settle_x,
+                recoil_target_y: settle_y,
+            };
+            player.tile_x = p_tx;
+            player.tile_y = p_ty;
+        }
+    }
+
+    if let Some((sx, sy, tx, ty)) = transition_to_post {
+        player_is_busy = true;
+
+        let opposite_direction = |dir| match dir {
+            Direction::NE => Direction::SW,
+            Direction::SE => Direction::NW,
+            Direction::SW => Direction::NE,
+            Direction::NW => Direction::SE,
+        };
+
+        curr_state.player.unit.direction = opposite_direction(curr_state.player.unit.direction);
+        curr_state.player.unit.movement = UnitMovement::PostPushing {
+            start_x: sx,
+            start_y: sy,
+            target_x: tx,
+            target_y: ty,
+            elapsed_time: 0.0,
+            duration: POST_PUSH_DURATION,
+        };
     }
 
     // Mob (box) update
@@ -167,20 +400,6 @@ pub fn make_step(
     let next_tx = p_tx + dx;
     let next_ty = p_ty + dy;
 
-    // Helper for calculating isometric pixels
-    let calc_target_pixels = |curr_x: f32, curr_y: f32, dir_x: i32, dir_y: i32| -> (f32, f32) {
-        let step_x = (TILE_SIZE as f32) * 0.5;
-        let step_y = (TILE_SIZE as f32) * 0.25;
-
-        match (dir_x, dir_y) {
-            (1, 0) => (curr_x + step_x, curr_y + step_y), // Right (SE)
-            (-1, 0) => (curr_x - step_x, curr_y - step_y), // Left (NW)
-            (0, -1) => (curr_x + step_x, curr_y - step_y), // Up (NE)
-            (0, 1) => (curr_x - step_x, curr_y + step_y), // Down (SW)
-            _ => (curr_x, curr_y),
-        }
-    };
-
     // ============================================
     // COLLISION AND MOVEMENT LOGIC
     // ============================================
@@ -209,64 +428,43 @@ pub fn make_step(
 
         // Checking the dynamics behind the box
         let behind_idx = (behind_ty as usize) * map_width + (behind_tx as usize);
-        if let Some(Some(_)) = curr_state.mob_grid.get(behind_idx) {
+        if curr_state.mob_grid.get(behind_idx).copied().flatten().is_some() {
             return;
         }
 
-        // Perform pushing
-
-        // Update the Grid (move the box index)
-        curr_state.mob_grid[next_idx] = None; // Free the cell where the box was
-        curr_state.mob_grid[behind_idx] = Some(box_idx); // Occupy a new cell
-
-        // Start the box animation
-        {
-            let box_unit = &mut curr_state.mobs[box_idx];
-            let (bx, by) = (box_unit.pixel_x, box_unit.pixel_y);
-            let (target_bx, target_by) = calc_target_pixels(bx, by, dx, dy);
-
-            box_unit.movement = UnitMovement::Moving {
-                start_x: bx,
-                start_y: by,
-                target_x: target_bx,
-                target_y: target_by,
-                elapsed_time: 0.0,
-                duration: MOVE_DURATION * BOX_DRAG,
-            };
-
-            box_unit.tile_x = behind_tx;
-            box_unit.tile_y = behind_ty;
-        }
-
-        // Start the player animation (Pushing)
-        {
-            let player = &mut curr_state.player.unit;
-            let (px, py) = (player.pixel_x, player.pixel_y);
-            let (target_px, target_py) = calc_target_pixels(px, py, dx, dy);
-
-            player.movement = UnitMovement::Pushing {
-                start_x: px,
-                start_y: py,
-                target_x: target_px,
-                target_y: target_py,
-                elapsed_time: 0.0,
-                duration: MOVE_DURATION * BOX_DRAG,
-            };
-            player.tile_x = next_tx;
-            player.tile_y = next_ty;
-        }
-    } else {
-        // Normal movement (no box in front)
-
+        // perform pre push
         let player = &mut curr_state.player.unit;
         let (px, py) = (player.pixel_x, player.pixel_y);
-        let (target_px, target_py) = calc_target_pixels(px, py, dx, dy);
+
+        let (offset_x, offset_y) = get_offset(dx, dy, 0.5);
+        let mid_x = px + offset_x;
+        let mid_y = py + offset_y;
+
+        player.movement = UnitMovement::PrePushing {
+            start_x: px,
+            start_y: py,
+            target_x: mid_x,
+            target_y: mid_y,
+            elapsed_time: 0.0,
+            duration: PRE_PUSH_DURATION,
+            box_idx,
+            player_next_tx: next_tx,
+            player_next_ty: next_ty,
+            box_next_tx: behind_tx,
+            box_next_ty: behind_ty,
+            push_dx: dx,
+            push_dy: dy,
+        };
+    } else {
+        let player = &mut curr_state.player.unit;
+        let (px, py) = (player.pixel_x, player.pixel_y);
+        let (offset_x, offset_y) = get_offset(dx, dy, 1.0);
 
         player.movement = UnitMovement::Moving {
             start_x: px,
             start_y: py,
-            target_x: target_px,
-            target_y: target_py,
+            target_x: px + offset_x,
+            target_y: py + offset_y,
             elapsed_time: 0.0,
             duration: MOVE_DURATION,
         };

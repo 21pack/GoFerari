@@ -99,7 +99,7 @@ fn main() {
     // prerender
     render.init(&game, &tiles_atlas);
 
-    // TODO: don't need? 
+    // TODO: don't need?
     // let all_units = {
     //     let mut units = vec![state.player.unit.clone()];
     //     units.extend(state.mobs.clone());

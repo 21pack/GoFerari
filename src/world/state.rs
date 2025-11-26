@@ -81,6 +81,51 @@ pub enum UnitMovement {
         elapsed_time: f32,
         /// Total movement time
         duration: f32,
+
+        /// Target position after pushing
+        recoil_target_x: f32,
+        recoil_target_y: f32,
+    },
+
+    /// Approaching box befor pushing it from one tile to another. same as `Moving`, but with different animation
+    PrePushing {
+        /// Initial position
+        start_x: f32,
+        start_y: f32,
+
+        /// Target position
+        target_x: f32,
+        target_y: f32,
+
+        /// Movement progress since starting
+        elapsed_time: f32,
+        /// Total movement time
+        duration: f32,
+
+        /// Context for the pushed box animation
+        box_idx: usize,
+        player_next_tx: i32,
+        player_next_ty: i32,
+        box_next_tx: i32,
+        box_next_ty: i32,
+        push_dx: i32,
+        push_dy: i32,
+    },
+
+    /// Going back after pushing box from one tile to another. same as `Moving`, but with different animation
+    PostPushing {
+        /// Initial position
+        start_x: f32,
+        start_y: f32,
+
+        /// Target position
+        target_x: f32,
+        target_y: f32,
+
+        /// Movement progress since starting
+        elapsed_time: f32,
+        /// Total movement time
+        duration: f32,
     },
 }
 

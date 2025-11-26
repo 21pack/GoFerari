@@ -18,6 +18,10 @@ frames_map = {
     "pushing_ne": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
     "pushing_nw": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
     "pushing_sw": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+    "walking_sw": [[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0]],
+    "walking_nw": [[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0]],
+    "walking_ne": [[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0]],
+    "walking_se": [[1, 1, 1, 1, 0], [1, 1, 1, 1, 0], [1, 1, 1, 1, 0]],
 }
 
 
@@ -64,4 +68,4 @@ if __name__ == "__main__":
     with open(output_path, "w") as f:
         json.dump(data, f, indent=4)
 
-    print(f"Generated {output_path}")
+    print(f"Generated {output_path}. May delete current frame config")

@@ -35,6 +35,8 @@ pub fn get_player_sprite(player: &Player, total_time: f64) -> String {
         UnitMovement::Moving { .. } => ("running", 13, 62.0 / 1000.0),
         UnitMovement::Pushing { .. } => ("pushing", 20, 83.0 / 1000.0),
         UnitMovement::Idle => ("idle", 22, 83.0 / 1000.0),
+        UnitMovement::PrePushing { .. } => ("walking", 12, 83.0 / 1000.0),
+        UnitMovement::PostPushing { .. } => ("walking", 12, 83.0 / 1000.0),
     };
 
     let dir_suffix = player.unit.direction.as_str();
