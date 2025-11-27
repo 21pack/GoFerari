@@ -132,7 +132,7 @@ if __name__ == "__main__":
     map4 = [
         [F, F, F, F, F, F, F, F, F, F, F],
         [F, F, W, W, W, W, W, W, W, F, F],
-        [W, W, W, W, F, F, F, F, W, F, F],
+        [W, W, W, F, F, F, F, F, W, F, F],
         [F, F, F, T, W, W, W, F, W, F, F],
         [F, W, F, W, F, F, F, F, W, W, F],
         [F, W, F, B, F, B, W, T, F, W, F],

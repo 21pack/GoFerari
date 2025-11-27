@@ -282,14 +282,14 @@ impl GameMap {
         for (name, obj_data) in map_json.objects {
             let object = Object {
                 name: name.clone(),
-                x: obj_data.x - 1,
-                y: obj_data.y - 1,
+                x: obj_data.x,
+                y: obj_data.y,
                 asset: obj_data.asset,
                 collidable: obj_data.collidable,
                 shadow: obj_data.shadow,
             };
 
-            let idx = (object.y + 1) as usize * width + (object.x + 1) as usize;
+            let idx = (object.y) as usize * width + (object.x) as usize;
             if idx < (width * height) && object.collidable {
                 object_collidable_map[idx] = true;
             }

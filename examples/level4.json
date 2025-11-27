@@ -2,10 +2,7 @@
   "meta": {
     "name": "level4",
     "tile_size": 256,
-    "size": [
-      11,
-      11
-    ]
+    "size": [11, 11]
   },
   "tiles": {
     "tile_1": {
@@ -676,186 +673,180 @@
       "collidable": true
     },
     "wall_11": {
-      "x": 3,
+      "x": 8,
       "y": 2,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_12": {
-      "x": 8,
-      "y": 2,
+      "x": 4,
+      "y": 3,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_13": {
-      "x": 4,
+      "x": 5,
       "y": 3,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_14": {
-      "x": 5,
+      "x": 6,
       "y": 3,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_15": {
-      "x": 6,
+      "x": 8,
       "y": 3,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_16": {
-      "x": 8,
-      "y": 3,
+      "x": 1,
+      "y": 4,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_17": {
-      "x": 1,
+      "x": 3,
       "y": 4,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_18": {
-      "x": 3,
-      "y": 4,
-      "asset": "wall_tile",
-      "collidable": true
-    },
-    "wall_19": {
       "x": 8,
       "y": 4,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_20": {
+    "wall_19": {
       "x": 9,
       "y": 4,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_21": {
+    "wall_20": {
       "x": 1,
+      "y": 5,
+      "asset": "wall_tile",
+      "collidable": true
+    },
+    "wall_21": {
+      "x": 6,
       "y": 5,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_22": {
-      "x": 6,
+      "x": 9,
       "y": 5,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_23": {
-      "x": 9,
-      "y": 5,
-      "asset": "wall_tile",
-      "collidable": true
-    },
-    "wall_24": {
       "x": 1,
       "y": 6,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_25": {
+    "wall_24": {
       "x": 7,
+      "y": 6,
+      "asset": "wall_tile",
+      "collidable": true
+    },
+    "wall_25": {
+      "x": 9,
       "y": 6,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_26": {
-      "x": 9,
-      "y": 6,
+      "x": 2,
+      "y": 7,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_27": {
-      "x": 2,
+      "x": 7,
       "y": 7,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_28": {
-      "x": 7,
+      "x": 9,
       "y": 7,
       "asset": "wall_tile",
       "collidable": true
     },
     "wall_29": {
-      "x": 9,
-      "y": 7,
-      "asset": "wall_tile",
-      "collidable": true
-    },
-    "wall_30": {
       "x": 0,
       "y": 8,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_31": {
+    "wall_30": {
       "x": 5,
       "y": 8,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_32": {
+    "wall_31": {
       "x": 7,
       "y": 8,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_33": {
+    "wall_32": {
       "x": 9,
       "y": 8,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_34": {
+    "wall_33": {
       "x": 10,
       "y": 8,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_35": {
+    "wall_34": {
       "x": 0,
       "y": 9,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_36": {
+    "wall_35": {
       "x": 2,
       "y": 9,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_37": {
+    "wall_36": {
       "x": 3,
       "y": 9,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_38": {
+    "wall_37": {
       "x": 4,
       "y": 9,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_39": {
+    "wall_38": {
       "x": 0,
       "y": 10,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_40": {
+    "wall_39": {
       "x": 6,
       "y": 10,
       "asset": "wall_tile",
       "collidable": true
     },
-    "wall_41": {
+    "wall_40": {
       "x": 7,
       "y": 10,
       "asset": "wall_tile",
@@ -894,7 +885,7 @@
       "is_player": false
     },
     "player": {
-      "x_start": 9,
+      "x_start": 10,
       "y_start": 9,
       "asset": "running_se_0",
       "is_player": true,

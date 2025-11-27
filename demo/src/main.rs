@@ -122,10 +122,15 @@ fn main() {
     let ground_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
     let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
-    let mut tiles_atlas = alphabet_atlas.clone();
+    // let mut tiles_atlas = alphabet_atlas.clone();
+    // Temp
+    let mut tiles_atlas = ground_atlas.clone();
 
     // parse game descr
-    let menu_path = project_root.join("examples/menu.json");
+    // let menu_path = project_root.join("examples/menu.json");
+    // Temp
+    let menu_path = project_root.join("examples/level4.json");
+
     let game0 = assets::GameMap::load(menu_path).unwrap();
     let mut game = game0.clone();
     let mut cur_level = 0;
@@ -188,6 +193,10 @@ fn main() {
             let level_path = project_root.join(level_path);
             let loaded_game = assets::GameMap::load(level_path).unwrap();
             game = loaded_game.clone();
+
+            if cur_level == 0 {
+                tiles_atlas = ground_atlas.clone();
+            }
             cur_level = id;
 
             (render, camera, state) =
