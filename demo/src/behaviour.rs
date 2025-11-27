@@ -1,4 +1,4 @@
-use crate::{initiator::lerp, input::InputSnapshot, TILE_SIZE};
+use crate::{initiator::lerp, input::InputSnapshot, MOVEMENT_SPEEDUP, TILE_SIZE};
 
 use ferari::world::{Direction, State, UnitMovement};
 
@@ -48,10 +48,10 @@ pub fn make_step(
     delta: f32,
     game: &ferari::assets::GameMap,
 ) {
-    const MOVE_DURATION: f32 = 0.6;
-    const PRE_PUSH_DURATION: f32 = 0.8;
+    const MOVE_DURATION: f32 = 0.6 / MOVEMENT_SPEEDUP;
+    const PRE_PUSH_DURATION: f32 = 0.8 / MOVEMENT_SPEEDUP;
     const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
-    const BOX_MOVE_DURATION: f32 = 3.3;
+    const BOX_MOVE_DURATION: f32 = 3.3 / MOVEMENT_SPEEDUP;
     const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
 
     let map_width = game.size[0] as usize;

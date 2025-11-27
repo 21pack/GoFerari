@@ -20,14 +20,16 @@ mod initiator;
 
 use ferari::render::RenderableEntity;
 
+/// Animation and movement speedup
+pub const MOVEMENT_SPEEDUP: f32 = 1.5;
+/// Upscaling factor for display.
+pub const UPSCALE: usize = 2;
 /// Logical screen width in pixels.
-pub const LOGIC_WIDTH: usize = 800;
+pub const LOGIC_WIDTH: usize = 800 / UPSCALE;
 /// Logical screen height in pixels.
-pub const LOGIC_HEIGHT: usize = 600;
+pub const LOGIC_HEIGHT: usize = 600 / UPSCALE;
 /// Tile size in pixels.
 pub const TILE_SIZE: usize = 256;
-/// Upscaling factor for display.
-pub const UPSCALE: usize = 1;
 
 fn main() {
     // Need to find root directory
