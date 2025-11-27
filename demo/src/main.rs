@@ -35,6 +35,7 @@ pub const LOGIC_HEIGHT: usize = 600 / UPSCALE;
 /// Tile size in pixels.
 pub const TILE_SIZE: usize = 256;
 
+#[cfg(target_os = "macos")]
 macro_rules! update_window {
     ($window:ident, $running:ident, $rx_frame:ident, $input_state:ident, $width:ident, $height:ident) => {
         // handle input in this thread
@@ -55,6 +56,7 @@ macro_rules! update_window {
     };
 }
 
+#[cfg(target_os = "macos")]
 macro_rules! create_menu {
     ($window:ident) => {
         $window.set_target_fps(60);
@@ -125,6 +127,18 @@ fn main() {
     let menu_path = project_root.join("examples/menu.json");
     let game0 = assets::GameMap::load(menu_path).unwrap();
     let mut game = game0.clone();
+    let mut cur_level = 0;
+
+    // init draw
+    let input_state = Arc::new(input::InputState::new());
+    let running = Arc::new(AtomicBool::new(true));
+    let (tx_frame, rx_frame) = bounded::<Vec<u32>>(2);
+
+    // framebuffer (`render <-> draw` connection)
+    let mut back_buffer: Vec<u32> = vec![0; LOGIC_WIDTH * LOGIC_HEIGHT];
+
+    // init time
+    let mut time = time::Time::new();
 
     #[cfg(target_os = "linux")]
     {
@@ -155,17 +169,6 @@ fn main() {
     #[cfg(target_os = "macos")]
     create_menu!(window);
 
-    // init draw
-    let input_state = Arc::new(input::InputState::new());
-    let running = Arc::new(AtomicBool::new(true));
-    let (tx_frame, rx_frame) = bounded::<Vec<u32>>(2);
-
-    // framebuffer (`render <-> draw` connection)
-    let mut back_buffer: Vec<u32> = vec![0; LOGIC_WIDTH * LOGIC_HEIGHT];
-
-    // init time
-    let mut time = time::Time::new();
-
     let (mut render, mut camera, mut state) =
         init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
 
@@ -173,25 +176,18 @@ fn main() {
     while running.load(Ordering::Acquire) {
         #[cfg(target_os = "macos")]
         if let Some(id) = window.is_menu_pressed() {
-            if id == 1 {
-                let level1_path = project_root.join("examples/level1.json");
-                let game1 = assets::GameMap::load(level1_path).unwrap();
-                game = game1.clone();
-            } else if id == 2 {
-                let level2_path = project_root.join("examples/level2.json");
-                let game2 = assets::GameMap::load(level2_path).unwrap();
-                game = game2.clone();
-            } else if id == 3 {
-                let level3_path = project_root.join("examples/level3.json");
-                let game3 = assets::GameMap::load(level3_path).unwrap();
-                game = game3.clone();
-            } else if id == 4 {
-                let level4_path = project_root.join("examples/level4.json"); // TODO: error in gamemap:280
-                let game4 = assets::GameMap::load(level4_path).unwrap();
-                game = game4.clone();
-            } else {
-                continue;
-            }
+            let level_path = match id {
+                1 => "examples/level1.json",
+                2 => "examples/level2.json",
+                3 => "examples/level3.json",
+                4 => "examples/level4.json",
+                _ => continue,
+            };
+
+            let level_path = project_root.join(level_path);
+            let loaded_game = assets::GameMap::load(level_path).unwrap();
+            game = loaded_game.clone();
+            cur_level = id;
 
             (render, camera, state) =
                 init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
