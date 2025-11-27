@@ -1,6 +1,9 @@
-use crate::world::{Camera, Unit};
+use crate::{
+    world::{Camera, Unit},
+    MOVEMENT_SPEEDUP,
+};
 
-use ferari::world::State;
+use ferari::world::{Player, State, UnitMovement};
 
 /// Returns a list of game objects that are currently visible within the camera's view.
 ///
@@ -22,12 +25,30 @@ pub fn get_visible_objects(cur_state: &State, camera: &Camera) -> Vec<Unit> {
     units.push(cur_state.player.unit.clone());
     units.extend(cur_state.mobs.clone());
 
-    units.into_iter().filter(|mob| camera.is_visible(mob.x, mob.y)).collect()
+    units.into_iter().filter(|mob| camera.is_visible(mob.pixel_x, mob.pixel_y)).collect()
 }
 
 /// Interpolate between two points
 pub fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a * (1.0 - t) + b * t
+}
+
+pub fn get_player_sprite(player: &Player, total_time: f64) -> String {
+    let k = 1.0 / 1000.0 / MOVEMENT_SPEEDUP as f64;
+    let (prefix, total_frames, period) = match player.unit.movement {
+        UnitMovement::Moving { .. } => ("running", 13, 62.0 * k),
+        UnitMovement::Pushing { .. } => ("pushing", 20, 83.0 * k),
+        UnitMovement::Idle => ("idle", 22, 83.0 * k),
+        UnitMovement::PrePushing { .. } => ("walking", 12, 83.0 * k),
+        UnitMovement::PostPushing { .. } => ("walking", 12, 83.0 * k),
+    };
+
+    let dir_suffix = player.unit.direction.as_str();
+
+    let cycles = (total_time / period).floor() as u32;
+    let frame_idx = cycles % total_frames;
+
+    format!("{}_{}_{}", prefix, dir_suffix, frame_idx)
 }
 
 // TODO: rewrite for new `player: Player``

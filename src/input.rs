@@ -55,17 +55,27 @@ impl InputState {
 
     /// Updates the input state by querying the current key states from the window.
     ///
-    /// This method checks the current state of the tracked keys (W, A, S, D, Escape)
-    /// in the provided window and updates the internal values accordingly.
+    /// This method checks the current state of movement and control keys in the provided
+    /// window and updates the internal atomic flags accordingly. Both `WASD` and `arrow keys`
+    /// are supported for directional input:
+    /// - Up: `W` or `↑`
+    /// - Down: `S` or `↓`
+    /// - Left: `A` or `←`
+    /// - Right: `D` or `→`
+    ///
+    /// The Escape key is used for pausing or exiting the game.
     ///
     /// # Parameters
     ///
     /// * `window` - A reference to the minifb `Window` to query for key states
     pub fn update(&self, window: &Window) {
-        self.up.store(window.is_key_down(Key::W), Ordering::Relaxed);
-        self.down.store(window.is_key_down(Key::S), Ordering::Relaxed);
-        self.left.store(window.is_key_down(Key::A), Ordering::Relaxed);
-        self.right.store(window.is_key_down(Key::D), Ordering::Relaxed);
+        self.up.store(window.is_key_down(Key::W) || window.is_key_down(Key::Up), Ordering::Relaxed);
+        self.down
+            .store(window.is_key_down(Key::S) || window.is_key_down(Key::Down), Ordering::Relaxed);
+        self.left
+            .store(window.is_key_down(Key::A) || window.is_key_down(Key::Left), Ordering::Relaxed);
+        self.right
+            .store(window.is_key_down(Key::D) || window.is_key_down(Key::Right), Ordering::Relaxed);
         self.escape.store(window.is_key_down(Key::Escape), Ordering::Relaxed);
     }
 

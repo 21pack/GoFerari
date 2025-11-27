@@ -65,6 +65,26 @@ pub struct JsonObject {
     pub shadow: bool,
 }
 
+/// Tile type that defines its properties in game logic.
+#[derive(Deserialize, Debug, Clone)]
+pub enum TileType {
+    /// Passable empty tile
+    #[serde(rename = "empty")]
+    Empty,
+    /// Impenetrable wall
+    #[serde(rename = "wall")]
+    Wall,
+    /// Target point
+    #[serde(rename = "target")]
+    Target,
+}
+
+impl Default for TileType {
+    fn default() -> Self {
+        TileType::Empty
+    }
+}
+
 /// Tile data from JSON.
 #[derive(Deserialize, Debug, Clone)]
 pub struct JsonTile {
@@ -74,6 +94,10 @@ pub struct JsonTile {
     pub y: u32,
     /// Asset identifier for the tile's appearance
     pub asset: String,
+
+    /// Logical tile type (default is `Empty`)
+    #[serde(default)]
+    pub tile_type: TileType,
 }
 
 /// Meta information about the game map from JSON.
@@ -179,6 +203,8 @@ pub struct Tile {
     pub y: u32,
     /// Asset identifier for the tile's appearance
     pub asset: String,
+    /// Logical type of tile
+    pub tile_type: TileType,
 }
 
 /// Game map, as parsed and ready to use.
@@ -197,6 +223,10 @@ pub struct GameMap {
     pub objects: HashMap<String, Object>,
     /// Mapping of tiles' names to their definitions
     pub tiles: HashMap<String, Tile>,
+    /// 1D vector representing the map's logical tile types
+    pub walk_map: Vec<TileType>,
+    /// 1D vector indicating if a tile is occupied by a collidable static object
+    pub object_collidable_map: Vec<bool>,
 }
 
 // ============================
@@ -218,6 +248,10 @@ impl GameMap {
         let reader = BufReader::new(file);
         let map_json: JsonMap = serde_json::from_reader(reader)?;
 
+        let width = map_json.meta.size[0] as usize;
+        let height = map_json.meta.size[1] as usize;
+
+        // Process Mobs
         let mut mobs = HashMap::new();
         for (name, mob_data) in map_json.mobs {
             let behaviour = mob_data.behaviour.as_ref().map(|b| Behaviour {
@@ -241,23 +275,45 @@ impl GameMap {
             mobs.insert(name, mob);
         }
 
+        // Process Objects and build Collidable map
+        // TODO: make normal asset parsing
         let mut objects = HashMap::new();
+        let mut object_collidable_map = vec![false; width * height];
         for (name, obj_data) in map_json.objects {
             let object = Object {
                 name: name.clone(),
-                x: obj_data.x,
-                y: obj_data.y,
+                x: obj_data.x - 1,
+                y: obj_data.y - 1,
                 asset: obj_data.asset,
                 collidable: obj_data.collidable,
                 shadow: obj_data.shadow,
             };
+
+            let idx = (object.y + 1) as usize * width + (object.x + 1) as usize;
+            if idx < (width * height) && object.collidable {
+                object_collidable_map[idx] = true;
+            }
+
             objects.insert(name, object);
         }
 
+        // Process Tiles and build Walk map
         let mut tiles = HashMap::new();
+        let mut walk_map = vec![TileType::Empty; width * height];
         for (name, tile_data) in map_json.tiles {
-            let tile =
-                Tile { name: name.clone(), x: tile_data.x, y: tile_data.y, asset: tile_data.asset };
+            let tile = Tile {
+                name: name.clone(),
+                x: tile_data.x,
+                y: tile_data.y,
+                asset: tile_data.asset,
+                tile_type: tile_data.tile_type,
+            };
+
+            let idx = tile.y as usize * width + tile.x as usize;
+            if idx < (width * height) {
+                walk_map[idx] = tile.tile_type.clone();
+            }
+
             tiles.insert(name, tile);
         }
 
@@ -268,6 +324,8 @@ impl GameMap {
             mobs,
             objects,
             tiles,
+            walk_map,
+            object_collidable_map,
         })
     }
 
@@ -370,6 +428,40 @@ impl GameMap {
     #[allow(dead_code)]
     pub fn iter_tiles(&self) -> impl Iterator<Item = &Tile> {
         self.tiles.values()
+    }
+
+    /// Checks whether the tile with coordinates `(target_x, target_y)` is passable.
+    ///
+    /// # Arguments
+    ///
+    /// * `target_x`, `target_y` - tile coordinates
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the tile is within the map bounds and is not a wall.
+    /// * `false` — otherwise.
+    pub fn is_walkable(&self, target_x: i32, target_y: i32) -> bool {
+        let width = self.size[0] as i32;
+        let height = self.size[1] as i32;
+
+        if target_x < 0 || target_y < 0 || target_x >= width || target_y >= height {
+            return false;
+        }
+
+        let idx = (target_y as usize) * (width as usize) + (target_x as usize);
+        !matches!(self.walk_map[idx], TileType::Wall)
+    }
+
+    /// Checks whether there is a collidable object at the given tile coordinates.
+    ///
+    /// # Returns
+    ///
+    /// * `true` if a collidable object exists at this position, `false` otherwise.
+    pub fn has_collidable_object_at(&self, tile_x: i32, tile_y: i32) -> bool {
+        let width = self.size[0] as i32;
+
+        let idx = (tile_y as usize) * (width as usize) + (tile_x as usize);
+        self.object_collidable_map[idx]
     }
 }
 

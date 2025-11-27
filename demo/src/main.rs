@@ -4,14 +4,17 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+#[cfg(target_os = "macos")]
 use minifb::{Key, Menu, Window, WindowOptions};
 
 use crossbeam_channel::bounded;
 
 use crate::behaviour::make_step;
-use crate::initiator::get_visible_objects;
+use crate::initiator::{get_player_sprite, get_visible_objects};
 
 use ferari::assets;
+#[cfg(target_os = "linux")]
+use ferari::draw;
 use ferari::input;
 use ferari::render;
 use ferari::time;
@@ -21,16 +24,18 @@ mod initiator;
 
 use ferari::render::RenderableEntity;
 
-/// Logical screen width in pixels.
-pub const LOGIC_WIDTH: usize = 200;
-/// Logical screen height in pixels.
-pub const LOGIC_HEIGHT: usize = 200;
-/// Tile size in pixels.
-pub const TILE_SIZE: usize = 16;
+/// Animation and movement speedup
+pub const MOVEMENT_SPEEDUP: f32 = 1.5;
 /// Upscaling factor for display.
-pub const UPSCALE: usize = 5;
+pub const UPSCALE: usize = 2;
+/// Logical screen width in pixels.
+pub const LOGIC_WIDTH: usize = 800 / UPSCALE;
+/// Logical screen height in pixels.
+pub const LOGIC_HEIGHT: usize = 600 / UPSCALE;
+/// Tile size in pixels.
+pub const TILE_SIZE: usize = 256;
 
-macro_rules! window_main_loop {
+macro_rules! update_window {
     ($window:ident, $running:ident, $rx_frame:ident, $input_state:ident, $width:ident, $height:ident) => {
         // handle input in this thread
         $input_state.update(&$window);
@@ -47,6 +52,23 @@ macro_rules! window_main_loop {
         }
 
         thread::sleep(Duration::from_millis(1));
+    };
+}
+
+macro_rules! create_menu {
+    ($window:ident) => {
+        $window.set_target_fps(60);
+
+        let mut menu = Menu::new("Edit").unwrap();
+        menu.add_item("Exit", 0).shortcut(Key::Escape, 0).build();
+
+        let mut sub_menu = Menu::new("Levels").unwrap();
+        sub_menu.add_item("Level 1", 1).build();
+        sub_menu.add_item("Level 2", 2).build();
+        sub_menu.add_item("Level 3", 3).build();
+
+        menu.add_sub_menu("Select Level", &sub_menu);
+        $window.add_menu(&menu);
     };
 }
 
@@ -98,11 +120,41 @@ fn main() {
 
     // parse game descr
     let level1_path = project_root.join("examples/input.json");
-    let level2_path = project_root.join("examples/input_homka.json");
+    // let level2_path = project_root.join("examples/input_homka.json");
 
     let game1 = assets::GameMap::load(level1_path).unwrap();
-    let game2 = assets::GameMap::load(level2_path).unwrap();
+    // #[cfg(target_os = "macos")]
+    // let game2 = assets::GameMap::load(level2_path).unwrap();
     let mut game = game1.clone();
+
+    #[cfg(target_os = "linux")]
+    {
+        let input_state = input_state.clone();
+        let running = running.clone();
+
+        thread::spawn(move || {
+            draw::run_draw_thread(
+                rx_frame,
+                input_state,
+                running,
+                LOGIC_WIDTH,
+                LOGIC_HEIGHT,
+                UPSCALE,
+            );
+        });
+    }
+
+    #[cfg(target_os = "macos")]
+    let mut window = Window::new(
+        "Ferari",
+        LOGIC_WIDTH * UPSCALE,
+        LOGIC_HEIGHT * UPSCALE,
+        WindowOptions::default(),
+    )
+    .unwrap();
+
+    #[cfg(target_os = "macos")]
+    create_menu!(window);
 
     // init draw
     let input_state = Arc::new(input::InputState::new());
@@ -112,60 +164,32 @@ fn main() {
     // framebuffer (`render <-> draw` connection)
     let mut back_buffer: Vec<u32> = vec![0; LOGIC_WIDTH * LOGIC_HEIGHT];
 
-    let mut window = Window::new(
-        "Ferari",
-        LOGIC_WIDTH * UPSCALE,
-        LOGIC_HEIGHT * UPSCALE,
-        WindowOptions::default(),
-    )
-    .unwrap();
-
-    window.set_target_fps(60);
-
-    let mut menu = Menu::new("Edit").unwrap();
-    menu.add_item("Exit", 0).shortcut(Key::Escape, 0).build(); // TODO: click don't work
-
-    let mut sub_menu = Menu::new("Levels").unwrap();
-    sub_menu.add_item("Level 1", 1).build();
-    sub_menu.add_item("Level 2", 2).build();
-    sub_menu.add_item("Level 3", 3).build();
-
-    menu.add_sub_menu("Select Level", &sub_menu);
-    window.add_menu(&menu);
-
     // init time
     let mut time = time::Time::new();
 
     let (mut render, mut camera, mut state) =
-        init_level(game, entities_atlas.clone(), tiles_atlas.clone());
+        init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
 
     // game loop
     while running.load(Ordering::Acquire) {
+        #[cfg(target_os = "macos")]
         if let Some(id) = window.is_menu_pressed() {
             if id == 1 {
                 game = game1.clone();
             } else if id == 2 {
-                game = game2.clone();
+                // game = game2.clone();
             } else {
                 continue;
             }
 
-            (render, camera, state) = init_level(game, entities_atlas.clone(), tiles_atlas.clone());
+            (render, camera, state) =
+                init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
         }
 
-        window_main_loop!(window, running, rx_frame, input_state, LOGIC_WIDTH, LOGIC_HEIGHT);
+        #[cfg(target_os = "macos")]
+        update_window!(window, running, rx_frame, input_state, LOGIC_WIDTH, LOGIC_HEIGHT);
 
         time.update();
-
-        // test gradient (TODO: move to tests?)
-        // let r = ((time.total).sin() * 127.0 + 128.0) as u32;
-        // let g = ((time.total + 2.0).sin() * 127.0 + 128.0) as u32;
-        // let b = ((time.total + 4.0).sin() * 127.0 + 128.0) as u32;
-        // let color = (r << 16) | (g << 8) | b;
-
-        // for px in back_buffer.iter_mut() {
-        //     *px = color;
-        // }
 
         // process input
         let input = input_state.read();
@@ -173,10 +197,10 @@ fn main() {
             running.store(false, Ordering::Release);
         }
 
-        make_step(&mut state, &input, time.delta);
+        make_step(&mut state, &input, time.delta, &game);
 
-        camera.center_x = state.player.unit.x.floor();
-        camera.center_y = state.player.unit.y.floor();
+        camera.center_x = state.player.unit.pixel_x.floor();
+        camera.center_y = state.player.unit.pixel_y.floor();
 
         let units_for_render = get_visible_objects(&state, &camera);
 
@@ -189,13 +213,13 @@ fn main() {
             .into_iter()
             .enumerate()
             .map(|(i, unit)| {
-                let name_model = if i == 0 { "knight_0" } else { "imp_20" };
-                let period = 0.4;
-                let cycles = (time.total / period).floor() as u32;
-                let animation_num = if cycles.is_multiple_of(2) { "_0" } else { "_1" };
-                let full_name = name_model.to_string() + animation_num;
+                let sprite_name = if i == 0 {
+                    get_player_sprite(&state.player, time.total as f64)
+                } else {
+                    "box".to_string()
+                };
 
-                RenderableEntity::new(unit.x, unit.y, full_name)
+                RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)
             })
             .collect();
 
