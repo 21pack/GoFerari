@@ -27,7 +27,7 @@ use ferari::render::RenderableEntity;
 /// Animation and movement speedup
 pub const MOVEMENT_SPEEDUP: f32 = 1.5;
 /// Upscaling factor for display.
-pub const UPSCALE: usize = 2;
+pub const UPSCALE: usize = 1;
 /// Logical screen width in pixels.
 pub const LOGIC_WIDTH: usize = 800 / UPSCALE;
 /// Logical screen height in pixels.
@@ -119,9 +119,10 @@ fn main() {
     let entities_path = assets_path.join("entities/atlas.json");
     let alphabet_path = assets_path.join("alphabet/atlas.json");
 
-    let tiles_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
+    let ground_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
-    let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap(); // TODO: alphabet_atlas don't parsed
+    let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
+    let mut tiles_atlas = alphabet_atlas.clone();
 
     // parse game descr
     let menu_path = project_root.join("examples/menu.json");
@@ -205,6 +206,8 @@ fn main() {
         }
 
         make_step(&mut state, &input, time.delta, &game);
+
+        // TODO: toggle level and tiles
 
         camera.center_x = state.player.unit.pixel_x.floor();
         camera.center_y = state.player.unit.pixel_y.floor();
