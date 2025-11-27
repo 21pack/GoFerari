@@ -2,10 +2,7 @@
   "meta": {
     "name": "demo_map",
     "tile_size": 256,
-    "size": [
-      25,
-      25
-    ]
+    "size": [25, 25]
   },
   "tiles": {
     "tile_1": {

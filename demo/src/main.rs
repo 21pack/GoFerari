@@ -66,6 +66,7 @@ macro_rules! create_menu {
         sub_menu.add_item("Level 1", 1).build();
         sub_menu.add_item("Level 2", 2).build();
         sub_menu.add_item("Level 3", 3).build();
+        sub_menu.add_item("Level 4", 4).build();
 
         menu.add_sub_menu("Select Level", &sub_menu);
         $window.add_menu(&menu);
@@ -119,12 +120,8 @@ fn main() {
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
 
     // parse game descr
-    let level1_path = project_root.join("examples/input.json");
-    // let level2_path = project_root.join("examples/input_homka.json");
-
+    let level1_path = project_root.join("examples/level1.json");
     let game1 = assets::GameMap::load(level1_path).unwrap();
-    // #[cfg(target_os = "macos")]
-    // let game2 = assets::GameMap::load(level2_path).unwrap();
     let mut game = game1.clone();
 
     #[cfg(target_os = "linux")]
@@ -177,7 +174,17 @@ fn main() {
             if id == 1 {
                 game = game1.clone();
             } else if id == 2 {
-                // game = game2.clone();
+                let level2_path = project_root.join("examples/level2.json");
+                let game2 = assets::GameMap::load(level2_path).unwrap();
+                game = game2.clone();
+            } else if id == 3 {
+                let level3_path = project_root.join("examples/level3.json");
+                let game3 = assets::GameMap::load(level3_path).unwrap();
+                game = game3.clone();
+            } else if id == 4 {
+                let level4_path = project_root.join("examples/level4.json"); // TODO: error in gamemap:280
+                let game4 = assets::GameMap::load(level4_path).unwrap();
+                game = game4.clone();
             } else {
                 continue;
             }

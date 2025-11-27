@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "name": "level1",
+    "tile_size": 256,
+    "size": [
+      5,
+      5
+    ]
+  },
+  "tiles": {
+    "tile_1": {
+      "x": 0,
+      "y": 0,
+      "asset": "target"
+    },
+    "tile_2": {
+      "x": 1,
+      "y": 0,
+      "asset": "floor"
+    },
+    "tile_3": {
+      "x": 2,
+      "y": 0,
+      "asset": "floor"
+    },
+    "tile_4": {
+      "x": 3,
+      "y": 0,
+      "asset": "floor"
+    },
+    "tile_5": {
+      "x": 4,
+      "y": 0,
+      "asset": "floor"
+    },
+    "tile_6": {
+      "x": 0,
+      "y": 1,
+      "asset": "floor"
+    },
+    "tile_7": {
+      "x": 1,
+      "y": 1,
+      "asset": "floor"
+    },
+    "tile_8": {
+      "x": 2,
+      "y": 1,
+      "asset": "floor"
+    },
+    "tile_9": {
+      "x": 3,
+      "y": 1,
+      "asset": "floor"
+    },
+    "tile_10": {
+      "x": 4,
+      "y": 1,
+      "asset": "floor"
+    },
+    "tile_11": {
+      "x": 0,
+      "y": 2,
+      "asset": "floor"
+    },
+    "tile_12": {
+      "x": 1,
+      "y": 2,
+      "asset": "floor"
+    },
+    "tile_13": {
+      "x": 2,
+      "y": 2,
+      "asset": "floor"
+    },
+    "tile_14": {
+      "x": 3,
+      "y": 2,
+      "asset": "floor"
+    },
+    "tile_15": {
+      "x": 4,
+      "y": 2,
+      "asset": "floor"
+    },
+    "tile_16": {
+      "x": 0,
+      "y": 3,
+      "asset": "floor"
+    },
+    "tile_17": {
+      "x": 1,
+      "y": 3,
+      "asset": "floor"
+    },
+    "tile_18": {
+      "x": 2,
+      "y": 3,
+      "asset": "floor"
+    },
+    "tile_19": {
+      "x": 3,
+      "y": 3,
+      "asset": "floor"
+    },
+    "tile_20": {
+      "x": 4,
+      "y": 3,
+      "asset": "floor"
+    },
+    "tile_21": {
+      "x": 0,
+      "y": 4,
+      "asset": "floor"
+    },
+    "tile_22": {
+      "x": 1,
+      "y": 4,
+      "asset": "floor"
+    },
+    "tile_23": {
+      "x": 2,
+      "y": 4,
+      "asset": "floor"
+    },
+    "tile_24": {
+      "x": 3,
+      "y": 4,
+      "asset": "floor"
+    },
+    "tile_25": {
+      "x": 4,
+      "y": 4,
+      "asset": "floor"
+    }
+  },
+  "objects": {},
+  "mobs": {
+    "box_1": {
+      "x_start": 1,
+      "y_start": 0,
+      "asset": "box",
+      "is_player": false
+    },
+    "player": {
+      "x_start": 2,
+      "y_start": 2,
+      "asset": "running_se_0",
+      "is_player": true,
+      "behaviour": {
+        "type": "controlled"
+      }
+    }
+  }
+}
