@@ -115,14 +115,16 @@ fn main() {
     // parse atlases
     let tiles_path = assets_path.join("tiles/atlas.json");
     let entities_path = assets_path.join("entities/atlas.json");
+    let alphabet_path = assets_path.join("alphabet/atlas.json");
 
     let tiles_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
+    let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap(); // TODO: alphabet_atlas don't parsed
 
     // parse game descr
-    let level1_path = project_root.join("examples/level1.json");
-    let game1 = assets::GameMap::load(level1_path).unwrap();
-    let mut game = game1.clone();
+    let menu_path = project_root.join("examples/menu.json");
+    let game0 = assets::GameMap::load(menu_path).unwrap();
+    let mut game = game0.clone();
 
     #[cfg(target_os = "linux")]
     {
@@ -172,6 +174,8 @@ fn main() {
         #[cfg(target_os = "macos")]
         if let Some(id) = window.is_menu_pressed() {
             if id == 1 {
+                let level1_path = project_root.join("examples/level1.json");
+                let game1 = assets::GameMap::load(level1_path).unwrap();
                 game = game1.clone();
             } else if id == 2 {
                 let level2_path = project_root.join("examples/level2.json");
