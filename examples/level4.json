@@ -11,607 +11,728 @@
     "tile_1": {
       "x": 0,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_2": {
       "x": 1,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_3": {
       "x": 2,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_4": {
       "x": 3,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_5": {
       "x": 4,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_6": {
       "x": 5,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_7": {
       "x": 6,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_8": {
       "x": 7,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_9": {
       "x": 8,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_10": {
       "x": 9,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_11": {
       "x": 10,
       "y": 0,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_12": {
       "x": 0,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_13": {
       "x": 1,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_14": {
       "x": 2,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_15": {
       "x": 3,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_16": {
       "x": 4,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_17": {
       "x": 5,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_18": {
       "x": 6,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_19": {
       "x": 7,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_20": {
       "x": 8,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_21": {
       "x": 9,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_22": {
       "x": 10,
       "y": 1,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_23": {
       "x": 0,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_24": {
       "x": 1,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_25": {
       "x": 2,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_26": {
       "x": 3,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_27": {
       "x": 4,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_28": {
       "x": 5,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_29": {
       "x": 6,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_30": {
       "x": 7,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_31": {
       "x": 8,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_32": {
       "x": 9,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_33": {
       "x": 10,
       "y": 2,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_34": {
       "x": 0,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_35": {
       "x": 1,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_36": {
       "x": 2,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_37": {
       "x": 3,
       "y": 3,
-      "asset": "target"
+      "asset": "target",
+      "tile_type": "target"
     },
     "tile_38": {
       "x": 4,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_39": {
       "x": 5,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_40": {
       "x": 6,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_41": {
       "x": 7,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_42": {
       "x": 8,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_43": {
       "x": 9,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_44": {
       "x": 10,
       "y": 3,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_45": {
       "x": 0,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_46": {
       "x": 1,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_47": {
       "x": 2,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_48": {
       "x": 3,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_49": {
       "x": 4,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_50": {
       "x": 5,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_51": {
       "x": 6,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_52": {
       "x": 7,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_53": {
       "x": 8,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_54": {
       "x": 9,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_55": {
       "x": 10,
       "y": 4,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_56": {
       "x": 0,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_57": {
       "x": 1,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_58": {
       "x": 2,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_59": {
       "x": 3,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_60": {
       "x": 4,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_61": {
       "x": 5,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_62": {
       "x": 6,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_63": {
       "x": 7,
       "y": 5,
-      "asset": "target"
+      "asset": "target",
+      "tile_type": "target"
     },
     "tile_64": {
       "x": 8,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_65": {
       "x": 9,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_66": {
       "x": 10,
       "y": 5,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_67": {
       "x": 0,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_68": {
       "x": 1,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_69": {
       "x": 2,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_70": {
       "x": 3,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_71": {
       "x": 4,
       "y": 6,
-      "asset": "target"
+      "asset": "target",
+      "tile_type": "empty"
     },
     "tile_72": {
       "x": 5,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_73": {
       "x": 6,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_74": {
       "x": 7,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_75": {
       "x": 8,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_76": {
       "x": 9,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_77": {
       "x": 10,
       "y": 6,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_78": {
       "x": 0,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_79": {
       "x": 1,
       "y": 7,
-      "asset": "target"
+      "asset": "target",
+      "tile_type": "target"
     },
     "tile_80": {
       "x": 2,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_81": {
       "x": 3,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_82": {
       "x": 4,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_83": {
       "x": 5,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_84": {
       "x": 6,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_85": {
       "x": 7,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_86": {
       "x": 8,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_87": {
       "x": 9,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_88": {
       "x": 10,
       "y": 7,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_89": {
       "x": 0,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_90": {
       "x": 1,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_91": {
       "x": 2,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_92": {
       "x": 3,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_93": {
       "x": 4,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_94": {
       "x": 5,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_95": {
       "x": 6,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_96": {
       "x": 7,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_97": {
       "x": 8,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_98": {
       "x": 9,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_99": {
       "x": 10,
       "y": 8,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_100": {
       "x": 0,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_101": {
       "x": 1,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_102": {
       "x": 2,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_103": {
       "x": 3,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_104": {
       "x": 4,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_105": {
       "x": 5,
       "y": 9,
-      "asset": "target"
+      "asset": "target",
+      "tile_type": "target"
     },
     "tile_106": {
       "x": 6,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_107": {
       "x": 7,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_108": {
       "x": 8,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_109": {
       "x": 9,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_110": {
       "x": 10,
       "y": 9,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_111": {
       "x": 0,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_112": {
       "x": 1,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_113": {
       "x": 2,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_114": {
       "x": 3,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_115": {
       "x": 4,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_116": {
       "x": 5,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_117": {
       "x": 6,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_118": {
       "x": 7,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_119": {
       "x": 8,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_120": {
       "x": 9,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     },
     "tile_121": {
       "x": 10,
       "y": 10,
-      "asset": "floor"
+      "asset": "floor",
+      "tile_type": "empty"
     }
   },
   "objects": {
@@ -894,7 +1015,7 @@
       "is_player": false
     },
     "player": {
-      "x_start": 9,
+      "x_start": 10,
       "y_start": 9,
       "asset": "running_se_0",
       "is_player": true,

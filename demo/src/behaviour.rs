@@ -1,6 +1,9 @@
 use crate::{initiator::lerp, input::InputSnapshot, MOVEMENT_SPEEDUP, TILE_SIZE};
 
-use ferari::world::{Direction, State, UnitMovement};
+use ferari::{
+    assets,
+    world::{Direction, State, UnitMovement},
+};
 
 // TODO: rm?
 // /// Calculates the absolute value (length) of a 2D vector.

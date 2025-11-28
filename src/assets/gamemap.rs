@@ -1,9 +1,10 @@
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::{HashMap, LinkedList};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+use std::vec;
 
 // TODO: delete mobs from json!
 
@@ -223,6 +224,9 @@ pub struct GameMap {
     pub objects: HashMap<String, Object>,
     /// Mapping of tiles' names to their definitions
     pub tiles: HashMap<String, Tile>,
+
+    /// Vector representing x,y positions for all targets
+    pub target_positions: LinkedList<(u32, u32)>,
     /// 1D vector representing the map's logical tile types
     pub walk_map: Vec<TileType>,
     /// 1D vector indicating if a tile is occupied by a collidable static object
@@ -300,6 +304,7 @@ impl GameMap {
         // Process Tiles and build Walk map
         let mut tiles = HashMap::new();
         let mut walk_map = vec![TileType::Empty; width * height];
+        let mut target_positions = LinkedList::new();
         for (name, tile_data) in map_json.tiles {
             let tile = Tile {
                 name: name.clone(),
@@ -312,6 +317,11 @@ impl GameMap {
             let idx = tile.y as usize * width + tile.x as usize;
             if idx < (width * height) {
                 walk_map[idx] = tile.tile_type.clone();
+            }
+            match tile.tile_type {
+                TileType::Target => target_positions.push_front((tile.x, tile.y)),
+
+                _ => (),
             }
 
             tiles.insert(name, tile);
@@ -326,6 +336,7 @@ impl GameMap {
             tiles,
             walk_map,
             object_collidable_map,
+            target_positions,
         })
     }
 

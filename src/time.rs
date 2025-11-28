@@ -38,7 +38,7 @@ impl Time {
 
         if self.fps_timer >= 1.0 {
             let fps = 1.0 / self.delta.max(1e-6);
-            println!("FPS: {:.1}", fps);
+            // println!("FPS: {:.1}", fps);
             self.fps_timer = 0.0;
         }
     }

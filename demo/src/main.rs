@@ -132,7 +132,7 @@ fn main() {
 
     // init draw
     let input_state = Arc::new(input::InputState::new());
-    let running = Arc::new(AtomicBool::new(true));
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
     let (tx_frame, rx_frame) = bounded::<Vec<u32>>(2);
 
     // framebuffer (`render <-> draw` connection)
@@ -218,6 +218,40 @@ fn main() {
             continue;
         }
 
+        // check if should to up the level
+        let goal = game.target_positions.len();
+        fn on_finish() -> () {
+            //replace me
+
+            print!("level finished!\n")
+        }
+        if goal == 0 {
+            on_finish();
+        }
+        let mut pos = 0;
+        let mut acc = goal;
+        let mut suc_boxes = vec![];
+        loop {
+            match state.mobs.get(pos) {
+                None => break,
+                // not finished yet
+                Some(unit) => {
+                    // cringe casts since cringe types :)
+                    let x = u32::try_from(unit.tile_x).ok().expect("fail bounds");
+                    let y = u32::try_from(unit.tile_y).ok().expect("fail bounds");
+                    if game.target_positions.contains(&(x, y)) {
+                        suc_boxes.push((unit.tile_x, unit.tile_y));
+                        acc = acc - 1
+                    };
+                    if acc == 0 {
+                        on_finish();
+                        break;
+                    }
+                    pos = pos + 1
+                }
+            }
+        }
+
         // frame render
         let visible_entities: Vec<RenderableEntity> = units_for_render
             .into_iter()
@@ -226,7 +260,11 @@ fn main() {
                 let sprite_name = if i == 0 {
                     get_player_sprite(&state.player, time.total as f64)
                 } else {
-                    "box".to_string()
+                    if suc_boxes.contains(&(unit.tile_x, unit.tile_y)) {
+                        "green_box".to_string()
+                    } else {
+                        "box".to_string()
+                    }
                 };
 
                 RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)
