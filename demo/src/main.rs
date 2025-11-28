@@ -239,9 +239,12 @@ fn main() {
                     // cringe casts since cringe types :)
                     let x = u32::try_from(unit.tile_x).ok().expect("fail bounds");
                     let y = u32::try_from(unit.tile_y).ok().expect("fail bounds");
-                    if game.target_positions.contains(&(x, y)) {
-                        suc_boxes.push((unit.tile_x, unit.tile_y));
-                        acc = acc - 1
+                    match unit.movement.clone() {
+                        world::UnitMovement::Idle if game.target_positions.contains(&(x, y)) => {
+                            suc_boxes.push((unit.tile_x, unit.tile_y));
+                            acc = acc - 1
+                        }
+                        _ => (),
                     };
                     if acc == 0 {
                         on_finish();
