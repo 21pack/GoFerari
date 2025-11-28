@@ -432,7 +432,7 @@
       "x": 4,
       "y": 6,
       "asset": "target",
-      "tile_type": "empty"
+      "tile_type": "target"
     },
     "tile_72": {
       "x": 5,
