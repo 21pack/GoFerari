@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 #[cfg(target_os = "macos")]
-use minifb::{Key, Menu, Window, WindowOptions};
+use minifb::{Key, Window, WindowOptions};
 
 use crossbeam_channel::bounded;
 
@@ -56,25 +56,6 @@ macro_rules! update_window {
     };
 }
 
-// #[cfg(target_os = "macos")]
-// macro_rules! create_menu {
-//     ($window:ident) => {
-//         $window.set_target_fps(60);
-
-//         let mut menu = Menu::new("Edit").unwrap();
-//         menu.add_item("Exit", 0).shortcut(Key::Escape, 0).build();
-
-//         let mut sub_menu = Menu::new("Levels").unwrap();
-//         sub_menu.add_item("Level 1", 1).build();
-//         sub_menu.add_item("Level 2", 2).build();
-//         sub_menu.add_item("Level 3", 3).build();
-//         sub_menu.add_item("Level 4", 4).build();
-
-//         menu.add_sub_menu("Select Level", &sub_menu);
-//         $window.add_menu(&menu);
-//     };
-// }
-
 fn init_level(
     game: assets::GameMap,
     entities_atlas: assets::Atlas,
@@ -123,12 +104,15 @@ fn main() {
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
     let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
     let tiles_atlas = alphabet_atlas.clone();
+
     // parse game descr
     let menu_path = project_root.join("examples/menu.json");
     let game0 = assets::GameMap::load(menu_path).unwrap();
     let mut game = game0.clone();
+
     let mut cur_level = 0;
     let mut cur_level2 = 0;
+
     // init draw
     let input_state = Arc::new(input::InputState::new());
     let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
@@ -166,11 +150,13 @@ fn main() {
     )
     .unwrap();
 
-    // #[cfg(target_os = "macos")]
-    // create_menu!(window);
-
     let (mut render, mut camera, mut state) =
         init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
+
+    // cringe cast since cringe types :)
+    fn cast(tile_z: i32) -> u32 {
+        u32::try_from(tile_z).ok().expect("fail bounds")
+    }
 
     // game loop
     while running.load(Ordering::Acquire) {
@@ -194,6 +180,9 @@ fn main() {
             (render, camera, state) = init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
         }
 
+        #[cfg(target_os = "macos")]
+        update_window!(window, running, rx_frame, input_state, LOGIC_WIDTH, LOGIC_HEIGHT);
+
         time.update();
 
         // process input
@@ -207,8 +196,6 @@ fn main() {
             Some(id) => cur_level2 = id,
         }
 
-        // TODO: toggle level and tiles
-
         camera.center_x = state.player.unit.pixel_x.floor();
         camera.center_y = state.player.unit.pixel_y.floor();
 
@@ -217,12 +204,9 @@ fn main() {
         if units_for_render.is_empty() {
             continue;
         }
-        // cringe cast since cringe types :)
 
-        fn cast(tile_z: i32) -> u32 {
-            u32::try_from(tile_z).ok().expect("fail bounds")
-        }
         let mut suc_boxes = vec![];
+        let player = state.player.unit.clone();
         // TODO refactor then and else
         // menu
         if cur_level == 0 {
@@ -233,8 +217,12 @@ fn main() {
                     // not selected yet
                     Some(unit) => {
                         let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
-                        match (unit.movement.clone(), game.links.get(&(x, y))) {
-                            (world::UnitMovement::Idle, Some(&id)) => {
+                        match (
+                            unit.movement.clone(),
+                            player.movement.clone(),
+                            game.links.get(&(x, y)),
+                        ) {
+                            (world::UnitMovement::Idle, world::UnitMovement::Idle, Some(&id)) => {
                                 cur_level2 = id;
                                 suc_boxes.push((unit.tile_x, unit.tile_y));
                                 break;
@@ -261,8 +249,8 @@ fn main() {
                     // not finished yet
                     Some(unit) => {
                         let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
-                        match unit.movement.clone() {
-                            world::UnitMovement::Idle
+                        match (unit.movement.clone(), player.movement.clone()) {
+                            (world::UnitMovement::Idle, world::UnitMovement::Idle)
                                 if game.target_positions.contains(&(x, y)) =>
                             {
                                 suc_boxes.push((unit.tile_x, unit.tile_y));
