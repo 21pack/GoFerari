@@ -229,7 +229,7 @@ fn main() {
                             }
                             _ => (),
                         }
-                        pos = pos + 1
+                        pos += 1;
                     }
                 }
             }
@@ -249,20 +249,25 @@ fn main() {
                     // not finished yet
                     Some(unit) => {
                         let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
-                        match (unit.movement.clone(), player.movement.clone()) {
-                            (world::UnitMovement::Idle, world::UnitMovement::Idle)
+                        match unit.movement.clone() {
+                            world::UnitMovement::Idle
                                 if game.target_positions.contains(&(x, y)) =>
                             {
                                 suc_boxes.push((unit.tile_x, unit.tile_y));
-                                acc = acc - 1
+                                acc -= 1;
                             }
                             _ => (),
                         };
                         if acc == 0 {
-                            cur_level2 = 0;
-                            break;
+                            match player.movement.clone() {
+                                world::UnitMovement::Idle => {
+                                    cur_level2 = 0;
+                                    break;
+                                }
+                                _ => (),
+                            };
                         }
-                        pos = pos + 1
+                        pos += 1;
                     }
                 }
             }
