@@ -2,10 +2,7 @@
   "meta": {
     "name": "menu",
     "tile_size": 256,
-    "size": [
-      10,
-      10
-    ]
+    "size": [10, 10]
   },
   "tiles": {
     "letter_1": {

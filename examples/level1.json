@@ -2,10 +2,7 @@
   "meta": {
     "name": "level1",
     "tile_size": 256,
-    "size": [
-      5,
-      5
-    ]
+    "size": [5, 5]
   },
   "tiles": {
     "tile_1": {

@@ -1,9 +1,6 @@
 use crate::{initiator::lerp, input::InputSnapshot, MOVEMENT_SPEEDUP, TILE_SIZE};
 
-use ferari::{
-    assets,
-    world::{Direction, State, UnitMovement},
-};
+use ferari::world::{Direction, State, UnitMovement};
 
 // TODO: rm?
 // /// Calculates the absolute value (length) of a 2D vector.
@@ -50,7 +47,7 @@ pub fn make_step(
     input_state: &InputSnapshot,
     delta: f32,
     game: &ferari::assets::GameMap,
-) -> Option<u32>{
+) -> Option<u32> {
     const MOVE_DURATION: f32 = 0.6 / MOVEMENT_SPEEDUP;
     const PRE_PUSH_DURATION: f32 = 0.8 / MOVEMENT_SPEEDUP;
     const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
@@ -359,15 +356,13 @@ pub fn make_step(
         }
     }
 
-
     // ============================================
     // INPUT PROCESSING
     // ============================================
 
     if input_state.left && input_state.right {
-        return Some (0);
+        return Some(0);
     }
-
 
     // If the player is busy (the animation has not finished), the input is not processed
     if player_is_busy {
@@ -376,7 +371,6 @@ pub fn make_step(
 
     let (mut dx, mut dy) = (0, 0);
     let mut new_dir = curr_state.player.unit.direction;
-
 
     if input_state.right {
         dx = 1;
@@ -395,7 +389,6 @@ pub fn make_step(
         dy = 1;
         new_dir = Direction::SW;
     }
-
 
     curr_state.player.unit.direction = new_dir;
 

@@ -42,7 +42,6 @@ def generate_data(name, map, size):
             # data["tiles"][tile_id] = {"x": x, "y": y, "asset": "floor"}
             # tile_count += 1
 
-
             if cell == _N:
                 continue
             elif cell == _P:
@@ -65,19 +64,15 @@ def generate_data(name, map, size):
             else:
                 letter_id = f"letter_{letter_count}"
 
-                try :                 
+                try:
                     data["tiles"][letter_id] = {
-                    "x": x,
-                    "y": y,
-                    "asset": cell,
-                    "tile_type" : {"link" : int (cell)}
-                }
-                except ValueError :
-                    data["tiles"][letter_id] = {
-                    "x": x,
-                    "y": y,
-                    "asset": cell
+                        "x": x,
+                        "y": y,
+                        "asset": cell,
+                        "tile_type": {"link": int(cell)},
                     }
+                except ValueError:
+                    data["tiles"][letter_id] = {"x": x, "y": y, "asset": cell}
                 letter_count += 1
 
     return data
