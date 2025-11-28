@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 #[cfg(target_os = "macos")]
-use minifb::{Key, Menu, Window, WindowOptions};
+use minifb::{Key, Window, WindowOptions};
 
 use crossbeam_channel::bounded;
 
@@ -56,25 +56,6 @@ macro_rules! update_window {
     };
 }
 
-#[cfg(target_os = "macos")]
-macro_rules! create_menu {
-    ($window:ident) => {
-        $window.set_target_fps(60);
-
-        let mut menu = Menu::new("Edit").unwrap();
-        menu.add_item("Exit", 0).shortcut(Key::Escape, 0).build();
-
-        let mut sub_menu = Menu::new("Levels").unwrap();
-        sub_menu.add_item("Level 1", 1).build();
-        sub_menu.add_item("Level 2", 2).build();
-        sub_menu.add_item("Level 3", 3).build();
-        sub_menu.add_item("Level 4", 4).build();
-
-        menu.add_sub_menu("Select Level", &sub_menu);
-        $window.add_menu(&menu);
-    };
-}
-
 fn init_level(
     game: assets::GameMap,
     entities_atlas: assets::Atlas,
@@ -122,22 +103,19 @@ fn main() {
     let ground_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
     let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
-    // let mut tiles_atlas = alphabet_atlas.clone();
-    // Temp
-    let mut tiles_atlas = ground_atlas.clone();
+    let tiles_atlas = alphabet_atlas.clone();
 
     // parse game descr
-    // let menu_path = project_root.join("examples/menu.json");
-    // Temp
-    let menu_path = project_root.join("examples/level4.json");
-
+    let menu_path = project_root.join("examples/menu.json");
     let game0 = assets::GameMap::load(menu_path).unwrap();
     let mut game = game0.clone();
+
     let mut cur_level = 0;
+    let mut cur_level2 = 0;
 
     // init draw
     let input_state = Arc::new(input::InputState::new());
-    let running = Arc::new(AtomicBool::new(true));
+    let running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
     let (tx_frame, rx_frame) = bounded::<Vec<u32>>(2);
 
     // framebuffer (`render <-> draw` connection)
@@ -172,17 +150,19 @@ fn main() {
     )
     .unwrap();
 
-    #[cfg(target_os = "macos")]
-    create_menu!(window);
-
     let (mut render, mut camera, mut state) =
-        init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
+        init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
+
+    // cringe cast since cringe types :)
+    fn cast(tile_z: i32) -> u32 {
+        u32::try_from(tile_z).ok().expect("fail bounds")
+    }
 
     // game loop
     while running.load(Ordering::Acquire) {
-        #[cfg(target_os = "macos")]
-        if let Some(id) = window.is_menu_pressed() {
-            let level_path = match id {
+        if cur_level != cur_level2 {
+            let level_path = match cur_level2 {
+                0 => "examples/menu.json",
                 1 => "examples/level1.json",
                 2 => "examples/level2.json",
                 3 => "examples/level3.json",
@@ -192,15 +172,12 @@ fn main() {
 
             let level_path = project_root.join(level_path);
             let loaded_game = assets::GameMap::load(level_path).unwrap();
+            let tiles_atlas =
+                if cur_level2 == 0 { alphabet_atlas.clone() } else { ground_atlas.clone() };
             game = loaded_game.clone();
+            cur_level = cur_level2;
 
-            if cur_level == 0 {
-                tiles_atlas = ground_atlas.clone();
-            }
-            cur_level = id;
-
-            (render, camera, state) =
-                init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
+            (render, camera, state) = init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
         }
 
         #[cfg(target_os = "macos")]
@@ -214,9 +191,10 @@ fn main() {
             running.store(false, Ordering::Release);
         }
 
-        make_step(&mut state, &input, time.delta, &game);
-
-        // TODO: toggle level and tiles
+        match make_step(&mut state, &input, time.delta, &game) {
+            None => (),
+            Some(id) => cur_level2 = id,
+        }
 
         camera.center_x = state.player.unit.pixel_x.floor();
         camera.center_y = state.player.unit.pixel_y.floor();
@@ -227,6 +205,69 @@ fn main() {
             continue;
         }
 
+        let mut suc_boxes = vec![];
+        let player = state.player.unit.clone();
+        // TODO refactor then and else
+        // menu
+        if cur_level == 0 {
+            let mut pos = 0;
+            loop {
+                match state.mobs.get(pos) {
+                    None => break,
+                    // not selected yet
+                    Some(unit) => {
+                        let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
+                        match (
+                            unit.movement.clone(),
+                            player.movement.clone(),
+                            game.links.get(&(x, y)),
+                        ) {
+                            (world::UnitMovement::Idle, world::UnitMovement::Idle, Some(&id)) => {
+                                cur_level2 = id;
+                                suc_boxes.push((unit.tile_x, unit.tile_y));
+                                break;
+                            }
+                            _ => (),
+                        }
+                        pos = pos + 1
+                    }
+                }
+            }
+        }
+        // check if should to up the level
+        else {
+            let goal = game.target_positions.len();
+
+            if goal == 0 {
+                cur_level2 = 0;
+            }
+            let mut pos = 0;
+            let mut acc = goal;
+            loop {
+                match state.mobs.get(pos) {
+                    None => break,
+                    // not finished yet
+                    Some(unit) => {
+                        let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
+                        match (unit.movement.clone(), player.movement.clone()) {
+                            (world::UnitMovement::Idle, world::UnitMovement::Idle)
+                                if game.target_positions.contains(&(x, y)) =>
+                            {
+                                suc_boxes.push((unit.tile_x, unit.tile_y));
+                                acc = acc - 1
+                            }
+                            _ => (),
+                        };
+                        if acc == 0 {
+                            cur_level2 = 0;
+                            break;
+                        }
+                        pos = pos + 1
+                    }
+                }
+            }
+        }
+
         // frame render
         let visible_entities: Vec<RenderableEntity> = units_for_render
             .into_iter()
@@ -235,7 +276,11 @@ fn main() {
                 let sprite_name = if i == 0 {
                     get_player_sprite(&state.player, time.total as f64)
                 } else {
-                    "box".to_string()
+                    if suc_boxes.contains(&(unit.tile_x, unit.tile_y)) {
+                        "green_box".to_string()
+                    } else {
+                        "box".to_string()
+                    }
                 };
 
                 RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)

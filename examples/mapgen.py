@@ -47,9 +47,19 @@ def generate_data(name, map, size):
             tile_id = f"tile_{tile_count}"
 
             if cell == T or cell == G:
-                data["tiles"][tile_id] = {"x": x, "y": y, "asset": "target"}
+                data["tiles"][tile_id] = {
+                    "x": x,
+                    "y": y,
+                    "asset": "target",
+                    "tile_type": "target",
+                }
             else:
-                data["tiles"][tile_id] = {"x": x, "y": y, "asset": "floor"}
+                data["tiles"][tile_id] = {
+                    "x": x,
+                    "y": y,
+                    "asset": "floor",
+                    "tile_type": "empty",
+                }
 
             tile_count += 1
 
