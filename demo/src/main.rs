@@ -202,7 +202,10 @@ fn main() {
             running.store(false, Ordering::Release);
         }
 
-        make_step(&mut state, &input, time.delta, &game);
+        match make_step(&mut state, &input, time.delta, &game) {
+            None => (),
+            Some(id) => cur_level2 = id,
+        }
 
         // TODO: toggle level and tiles
 
@@ -225,8 +228,6 @@ fn main() {
         if cur_level == 0 {
             let mut pos = 0;
             loop {
-                // print!("mobs :{:?}\n", state.mobs);
-                // print!("links : {:?}\n", game.links);
                 match state.mobs.get(pos) {
                     None => break,
                     // not selected yet
@@ -234,7 +235,6 @@ fn main() {
                         let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
                         match (unit.movement.clone(), game.links.get(&(x, y))) {
                             (world::UnitMovement::Idle, Some(&id)) => {
-                                print!("pressed {}\n", id);
                                 cur_level2 = id;
                                 suc_boxes.push((unit.tile_x, unit.tile_y));
                                 break;

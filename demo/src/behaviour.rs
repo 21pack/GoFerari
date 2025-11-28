@@ -50,7 +50,7 @@ pub fn make_step(
     input_state: &InputSnapshot,
     delta: f32,
     game: &ferari::assets::GameMap,
-) {
+) -> Option<u32>{
     const MOVE_DURATION: f32 = 0.6 / MOVEMENT_SPEEDUP;
     const PRE_PUSH_DURATION: f32 = 0.8 / MOVEMENT_SPEEDUP;
     const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
@@ -359,17 +359,24 @@ pub fn make_step(
         }
     }
 
-    // If the player is busy (the animation has not finished), the input is not processed
-    if player_is_busy {
-        return;
-    }
 
     // ============================================
     // INPUT PROCESSING
     // ============================================
 
+    if input_state.left && input_state.right {
+        return Some (0);
+    }
+
+
+    // If the player is busy (the animation has not finished), the input is not processed
+    if player_is_busy {
+        return None;
+    }
+
     let (mut dx, mut dy) = (0, 0);
     let mut new_dir = curr_state.player.unit.direction;
+
 
     if input_state.right {
         dx = 1;
@@ -389,10 +396,11 @@ pub fn make_step(
         new_dir = Direction::SW;
     }
 
+
     curr_state.player.unit.direction = new_dir;
 
     if dx == 0 && dy == 0 {
-        return;
+        return None;
     }
 
     // Current player coordinates
@@ -409,7 +417,7 @@ pub fn make_step(
 
     // Checking map boundaries and static walls
     if !game.is_walkable(next_tx, next_ty) || game.has_collidable_object_at(next_tx, next_ty) {
-        return;
+        return None;
     }
 
     // Checking dynamic objects
@@ -426,13 +434,13 @@ pub fn make_step(
         if !game.is_walkable(behind_tx, behind_ty)
             || game.has_collidable_object_at(behind_tx, behind_ty)
         {
-            return;
+            return None;
         }
 
         // Checking the dynamics behind the box
         let behind_idx = (behind_ty as usize) * map_width + (behind_tx as usize);
         if curr_state.mob_grid.get(behind_idx).copied().flatten().is_some() {
-            return;
+            return None;
         }
 
         // perform pre push
@@ -474,6 +482,7 @@ pub fn make_step(
         player.tile_x = next_tx;
         player.tile_y = next_ty;
     }
+    None
 }
 
 // TODO: rewrite
