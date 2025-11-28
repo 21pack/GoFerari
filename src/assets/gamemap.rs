@@ -2,7 +2,7 @@ use serde::Deserialize;
 use std::collections::{HashMap, LinkedList};
 use std::error::Error;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{copy, BufReader};
 use std::path::Path;
 use std::vec;
 
@@ -78,6 +78,10 @@ pub enum TileType {
     /// Target point
     #[serde(rename = "target")]
     Target,
+
+    /// Link to some id (e.g. map id )
+    #[serde(rename = "link")]
+    Link(u32),
 }
 
 impl Default for TileType {
@@ -224,9 +228,10 @@ pub struct GameMap {
     pub objects: HashMap<String, Object>,
     /// Mapping of tiles' names to their definitions
     pub tiles: HashMap<String, Tile>,
-
     /// Vector representing x,y positions for all targets
     pub target_positions: LinkedList<(u32, u32)>,
+    /// Mapping of (link) tyle coordinates x,y to due id
+    pub links: HashMap<(u32, u32), u32>,
     /// 1D vector representing the map's logical tile types
     pub walk_map: Vec<TileType>,
     /// 1D vector indicating if a tile is occupied by a collidable static object
@@ -305,6 +310,7 @@ impl GameMap {
         let mut tiles = HashMap::new();
         let mut walk_map = vec![TileType::Empty; width * height];
         let mut target_positions = LinkedList::new();
+        let mut links = HashMap::new();
         for (name, tile_data) in map_json.tiles {
             let tile = Tile {
                 name: name.clone(),
@@ -320,10 +326,11 @@ impl GameMap {
             }
             match tile.tile_type {
                 TileType::Target => target_positions.push_front((tile.x, tile.y)),
-
+                TileType::Link(id) => {
+                    links.insert((tile_data.x, tile_data.y), id);
+                }
                 _ => (),
             }
-
             tiles.insert(name, tile);
         }
 
@@ -337,6 +344,7 @@ impl GameMap {
             walk_map,
             object_collidable_map,
             target_positions,
+            links,
         })
     }
 

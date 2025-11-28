@@ -2,7 +2,10 @@
   "meta": {
     "name": "menu",
     "tile_size": 256,
-    "size": [10, 10]
+    "size": [
+      10,
+      10
+    ]
   },
   "tiles": {
     "letter_1": {
@@ -63,22 +66,34 @@
     "letter_12": {
       "x": 4,
       "y": 4,
-      "asset": "1"
+      "asset": "1",
+      "tile_type": {
+        "link": 1
+      }
     },
     "letter_13": {
       "x": 4,
       "y": 5,
-      "asset": "2"
+      "asset": "2",
+      "tile_type": {
+        "link": 2
+      }
     },
     "letter_14": {
       "x": 4,
       "y": 6,
-      "asset": "3"
+      "asset": "3",
+      "tile_type": {
+        "link": 3
+      }
     },
     "letter_15": {
       "x": 4,
       "y": 7,
-      "asset": "4"
+      "asset": "4",
+      "tile_type": {
+        "link": 4
+      }
     }
   },
   "objects": {},
