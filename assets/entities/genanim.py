@@ -199,8 +199,7 @@ if __name__ == "__main__":
 
     print(f"Generated {output_path}. May delete current frame config")
 
-s = '''
-
+s = """
 ,
         "box": {
             "x": 1010,
@@ -214,4 +213,4 @@ s = '''
             "w": 64,
             "h": 64
         }
-'''
+"""

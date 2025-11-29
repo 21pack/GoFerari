@@ -167,6 +167,7 @@ fn main() {
                 2 => "examples/level2.json",
                 3 => "examples/level3.json",
                 4 => "examples/level4.json",
+                5 => "examples/level5.json",
                 _ => continue,
             };
 

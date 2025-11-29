@@ -36,11 +36,11 @@ pub fn lerp(a: f32, b: f32, t: f32) -> f32 {
 pub fn get_player_sprite(player: &Player, total_time: f64) -> String {
     let k = 1.0 / 1000.0 / MOVEMENT_SPEEDUP as f64;
     let (prefix, total_frames, period) = match player.unit.movement {
-        UnitMovement::Moving { .. } => ("running", 14, 62.0 * k),
-        UnitMovement::Pushing { .. } => ("pushing", 37, 83.0 * k),
-        UnitMovement::Idle => ("idle", 31, 83.0 * k),
-        UnitMovement::PrePushing { .. } => ("walkingforward", 24, 83.0 * k),
-        UnitMovement::PostPushing { .. } => ("walkingback", 23, 83.0 * k),
+        UnitMovement::Moving { .. } => ("running", 14, 45.0 * k),
+        UnitMovement::Pushing { .. } => ("pushing", 37, 25.0 * k),
+        UnitMovement::Idle => ("idle", 31, 45.0 * k),
+        UnitMovement::PrePushing { .. } => ("walkingforward", 24, 30.0 * k),
+        UnitMovement::PostPushing { .. } => ("walkingback", 23, 30.0 * k),
     };
 
     let dir_suffix = player.unit.direction.as_str();

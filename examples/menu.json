@@ -2,102 +2,110 @@
   "meta": {
     "name": "menu",
     "tile_size": 128,
-    "size": [10, 10]
+    "size": [6, 5]
   },
   "tiles": {
     "letter_1": {
-      "x": 2,
-      "y": 1,
-      "asset": "C"
+      "x": 0,
+      "y": 0,
+      "asset": "letter_C"
     },
     "letter_2": {
-      "x": 3,
-      "y": 1,
-      "asset": "H"
+      "x": 1,
+      "y": 0,
+      "asset": "letter_H"
     },
     "letter_3": {
-      "x": 4,
-      "y": 1,
-      "asset": "O"
+      "x": 2,
+      "y": 0,
+      "asset": "letter_O"
     },
     "letter_4": {
-      "x": 5,
-      "y": 1,
-      "asset": "O"
+      "x": 3,
+      "y": 0,
+      "asset": "letter_O"
     },
     "letter_5": {
-      "x": 6,
-      "y": 1,
-      "asset": "S"
+      "x": 4,
+      "y": 0,
+      "asset": "letter_S"
     },
     "letter_6": {
-      "x": 7,
-      "y": 1,
-      "asset": "E"
+      "x": 5,
+      "y": 0,
+      "asset": "letter_E"
     },
     "letter_7": {
-      "x": 2,
-      "y": 2,
-      "asset": "L"
+      "x": 0,
+      "y": 1,
+      "asset": "letter_L"
     },
     "letter_8": {
-      "x": 3,
-      "y": 2,
-      "asset": "E"
+      "x": 1,
+      "y": 1,
+      "asset": "letter_E"
     },
     "letter_9": {
-      "x": 4,
-      "y": 2,
-      "asset": "V"
+      "x": 2,
+      "y": 1,
+      "asset": "letter_V"
     },
     "letter_10": {
-      "x": 5,
-      "y": 2,
-      "asset": "E"
+      "x": 3,
+      "y": 1,
+      "asset": "letter_E"
     },
     "letter_11": {
-      "x": 6,
-      "y": 2,
-      "asset": "L"
+      "x": 4,
+      "y": 1,
+      "asset": "letter_L"
     },
     "letter_12": {
-      "x": 4,
+      "x": 0,
       "y": 4,
-      "asset": "1",
+      "asset": "letter_1",
       "tile_type": {
         "link": 1
       }
     },
     "letter_13": {
-      "x": 4,
-      "y": 5,
-      "asset": "2",
+      "x": 1,
+      "y": 4,
+      "asset": "letter_2",
       "tile_type": {
         "link": 2
       }
     },
     "letter_14": {
-      "x": 4,
-      "y": 6,
-      "asset": "3",
+      "x": 2,
+      "y": 4,
+      "asset": "letter_3",
       "tile_type": {
         "link": 3
       }
     },
     "letter_15": {
-      "x": 4,
-      "y": 7,
-      "asset": "4",
+      "x": 3,
+      "y": 4,
+      "asset": "letter_4",
       "tile_type": {
         "link": 4
+      }
+    },
+    "letter_16": {
+      "x": 4,
+      "y": 4,
+      "asset": "letter_5",
+      "tile_type": {
+        "link": 5
       }
     }
   },
   "objects": {},
   "mobs": {
     "player": {
-      "x_start": 1,
-      "y_start": 3,
+      "x_start": 0,
+      "y_start": 2,
       "asset": "running_se_0",
       "is_player": true,
       "behaviour": {
@@ -105,26 +113,32 @@
       }
     },
     "box_1": {
-      "x_start": 3,
-      "y_start": 4,
+      "x_start": 0,
+      "y_start": 3,
       "asset": "box",
       "is_player": false
     },
     "box_2": {
-      "x_start": 3,
-      "y_start": 5,
+      "x_start": 1,
+      "y_start": 3,
       "asset": "box",
       "is_player": false
     },
     "box_3": {
-      "x_start": 3,
-      "y_start": 6,
+      "x_start": 2,
+      "y_start": 3,
       "asset": "box",
       "is_player": false
     },
     "box_4": {
       "x_start": 3,
-      "y_start": 7,
+      "y_start": 3,
+      "asset": "box",
+      "is_player": false
+    },
+    "box_5": {
+      "x_start": 4,
+      "y_start": 3,
       "asset": "box",
       "is_player": false
     }

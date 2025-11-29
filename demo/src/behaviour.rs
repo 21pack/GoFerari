@@ -48,10 +48,10 @@ pub fn make_step(
     delta: f32,
     game: &ferari::assets::GameMap,
 ) -> Option<u32> {
-    const MOVE_DURATION: f32 = 0.6 / MOVEMENT_SPEEDUP;
-    const PRE_PUSH_DURATION: f32 = 0.8 / MOVEMENT_SPEEDUP;
-    const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
-    const BOX_MOVE_DURATION: f32 = 2.0 / MOVEMENT_SPEEDUP;
+    const MOVE_DURATION: f32 = 0.35 / MOVEMENT_SPEEDUP;
+    const PRE_PUSH_DURATION: f32 = 0.40 / MOVEMENT_SPEEDUP;
+    const POST_PUSH_DURATION: f32 = 0.50;
+    const BOX_MOVE_DURATION: f32 = 1.25 / MOVEMENT_SPEEDUP;
     const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
 
     let map_width = game.size[0] as usize;
@@ -269,7 +269,7 @@ pub fn make_step(
             curr_state.mob_grid[new_box_idx] = Some(box_idx);
 
             let box_unit = &mut curr_state.mobs[box_idx];
-            let (bx, by) = (box_unit.pixel_x, box_unit.pixel_y);
+            let (bx, by) = (box_unit.pixel_x.round(), box_unit.pixel_y.round());
             let (offset_x, offset_y) = get_offset(dx, dy, 1.0);
             let (target_bx, target_by) = (bx + offset_x, by + offset_y);
 
@@ -278,7 +278,7 @@ pub fn make_step(
                 start_y: by,
                 target_x: target_bx,
                 target_y: target_by,
-                elapsed_time: 0.0,
+                elapsed_time: 0.0 - delta,
                 duration: BOX_MOVE_DURATION,
             };
             box_unit.tile_x = b_tx;

@@ -106,7 +106,7 @@ impl Render {
 
                 // isometric projection
                 let screen_x = (object.x as i32 - object.y as i32) * (fw / 2) + offset_x;
-                let screen_y = (object.x as i32 + object.y as i32) * (fh / 4) + offset_y - (fh / 2);
+                let screen_y = (object.x as i32 + object.y as i32) * (fh / 4) + offset_y - (fh / 2) - 64; // TODO: (-64) is a shit-code to fix wall's offset
                 self.render_shadow(frame, screen_x, screen_y, static_atlas);
                 self.render_object(frame, screen_x, screen_y, static_atlas);
             }
@@ -381,7 +381,7 @@ impl Render {
         let (atlas_w, atlas_h) = atlas.image.dimensions();
 
         let light_dir_x = 1.0;
-        let light_dir_y = 0.5;
+        let light_dir_y = 0.0;
         let shadow_scale = 0.5;
 
         for dy in 0..frame.h as i32 {
@@ -444,7 +444,7 @@ impl Render {
         let (atlas_w, atlas_h) = self.entity_atlas.image.dimensions();
 
         let light_dir_x = 1.0;
-        let light_dir_y = 0.5;
+        let light_dir_y = 0.0;
         let shadow_scale = 0.5;
 
         for dy in 0..frame.h as i32 {
