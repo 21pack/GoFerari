@@ -25,13 +25,13 @@ mod initiator;
 use ferari::render::RenderableEntity;
 
 /// Animation and movement speedup
-pub const MOVEMENT_SPEEDUP: f32 = 1.5;
+pub const MOVEMENT_SPEEDUP: f32 = 1.0;
 /// Upscaling factor for display.
-pub const UPSCALE: usize = 1;
+pub const UPSCALE: usize = 2;
 /// Logical screen width in pixels.
-pub const LOGIC_WIDTH: usize = 800 / UPSCALE;
+pub const LOGIC_WIDTH: usize = 1280 / UPSCALE;
 /// Logical screen height in pixels.
-pub const LOGIC_HEIGHT: usize = 600 / UPSCALE;
+pub const LOGIC_HEIGHT: usize = 720 / UPSCALE;
 /// Tile size in pixels.
 pub const TILE_SIZE: usize = 128;
 

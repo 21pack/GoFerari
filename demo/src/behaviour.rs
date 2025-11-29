@@ -51,7 +51,7 @@ pub fn make_step(
     const MOVE_DURATION: f32 = 0.6 / MOVEMENT_SPEEDUP;
     const PRE_PUSH_DURATION: f32 = 0.8 / MOVEMENT_SPEEDUP;
     const POST_PUSH_DURATION: f32 = PRE_PUSH_DURATION;
-    const BOX_MOVE_DURATION: f32 = 3.3 / MOVEMENT_SPEEDUP;
+    const BOX_MOVE_DURATION: f32 = 2.0 / MOVEMENT_SPEEDUP;
     const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
 
     let map_width = game.size[0] as usize;
@@ -176,7 +176,6 @@ pub fn make_step(
 
                     let (dx, dy) = get_dir_delta(unit.direction);
 
-                    // 1. Check if user is still holding the correct key
                     let continuing_input = match unit.direction {
                         Direction::SE => input_state.right,
                         Direction::NW => input_state.left,
@@ -311,14 +310,14 @@ pub fn make_step(
     if let Some((sx, sy, tx, ty)) = transition_to_post {
         player_is_busy = true;
 
-        let opposite_direction = |dir| match dir {
-            Direction::NE => Direction::SW,
-            Direction::SE => Direction::NW,
-            Direction::SW => Direction::NE,
-            Direction::NW => Direction::SE,
-        };
+        // let opposite_direction = |dir| match dir {
+        //     Direction::NE => Direction::SW,
+        //     Direction::SE => Direction::NW,
+        //     Direction::SW => Direction::NE,
+        //     Direction::NW => Direction::SE,
+        // };
 
-        curr_state.player.unit.direction = opposite_direction(curr_state.player.unit.direction);
+        // curr_state.player.unit.direction = opposite_direction(curr_state.player.unit.direction);
         curr_state.player.unit.movement = UnitMovement::PostPushing {
             start_x: sx,
             start_y: sy,
