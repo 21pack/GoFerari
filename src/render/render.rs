@@ -106,7 +106,8 @@ impl Render {
 
                 // isometric projection
                 let screen_x = (object.x as i32 - object.y as i32) * (fw / 2) + offset_x;
-                let screen_y = (object.x as i32 + object.y as i32) * (fh / 4) + offset_y - (fh / 2) - 64; // TODO: (-64) is a shit-code to fix wall's offset
+                let screen_y =
+                    (object.x as i32 + object.y as i32) * (fh / 4) + offset_y - (fh / 2) - 64; // TODO: (-64) is a shit-code to fix wall's offset
                 self.render_shadow(frame, screen_x, screen_y, static_atlas);
                 self.render_object(frame, screen_x, screen_y, static_atlas);
             }
