@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "level3",
-    "tile_size": 256,
+    "tile_size": 128,
     "size": [10, 10]
   },
   "tiles": {

@@ -33,7 +33,7 @@ pub const LOGIC_WIDTH: usize = 800 / UPSCALE;
 /// Logical screen height in pixels.
 pub const LOGIC_HEIGHT: usize = 600 / UPSCALE;
 /// Tile size in pixels.
-pub const TILE_SIZE: usize = 256;
+pub const TILE_SIZE: usize = 128;
 
 #[cfg(target_os = "macos")]
 macro_rules! update_window {
@@ -98,12 +98,12 @@ fn main() {
     // parse atlases
     let tiles_path = assets_path.join("tiles/atlas.json");
     let entities_path = assets_path.join("entities/atlas.json");
-    let alphabet_path = assets_path.join("alphabet/atlas.json");
+    // let alphabet_path = assets_path.join("alphabet/atlas.json");
 
     let ground_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
-    let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
-    let tiles_atlas = alphabet_atlas.clone();
+    // let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
+    let tiles_atlas = ground_atlas.clone();
 
     // parse game descr
     let menu_path = project_root.join("examples/menu.json");
@@ -173,7 +173,7 @@ fn main() {
             let level_path = project_root.join(level_path);
             let loaded_game = assets::GameMap::load(level_path).unwrap();
             let tiles_atlas =
-                if cur_level2 == 0 { alphabet_atlas.clone() } else { ground_atlas.clone() };
+                if cur_level2 == 0 { ground_atlas.clone() } else { ground_atlas.clone() };
             game = loaded_game.clone();
             cur_level = cur_level2;
 
