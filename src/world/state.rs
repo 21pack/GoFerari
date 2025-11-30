@@ -20,9 +20,10 @@ pub struct State {
     pub grid_width: i32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
     NE, // North East (Up)
+    #[default]
     SE, // South East (Right)
     SW, // South West (Down)
     NW, // North West (Left)
@@ -39,16 +40,11 @@ impl Direction {
     }
 }
 
-impl Default for Direction {
-    fn default() -> Self {
-        Direction::SE
-    }
-}
-
 /// State for discrete movement and animation.
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub enum UnitMovement {
     /// Standing still
+    #[default]
     Idle,
 
     /// Moving from one tile to another
@@ -129,12 +125,6 @@ pub enum UnitMovement {
     },
 }
 
-impl Default for UnitMovement {
-    fn default() -> Self {
-        Self::Idle
-    }
-}
-
 /// Represents a unit entity in the game world with position and movement capabilities.
 ///
 /// Units can be either player-controlled or game-controlled mobs. Each unit has
@@ -197,7 +187,7 @@ pub struct Player {
 
 impl Player {
     pub fn new(unit: Unit) -> Self {
-        Self { unit: unit }
+        Self { unit }
     }
 }
 

@@ -198,26 +198,28 @@ pub fn make_step(
                         let walkable = game.is_walkable(next_box_tx, next_box_ty)
                             && !game.has_collidable_object_at(next_box_tx, next_box_ty);
 
-                        let next_box_idx =
-                            (next_box_ty as usize) * map_width + (next_box_tx as usize);
-                        let mob_blocking =
-                            curr_state.mob_grid.get(next_box_idx).copied().flatten().is_some();
+                        if next_box_ty >= 0 && next_box_tx >= 0 {
+                            let next_box_idx =
+                                (next_box_ty as usize) * map_width + (next_box_tx as usize);
+                            let mob_blocking =
+                                curr_state.mob_grid.get(next_box_idx).copied().flatten().is_some();
 
-                        if walkable && !mob_blocking {
-                            let current_box_pos_idx =
-                                (next_p_ty as usize) * map_width + (next_p_tx as usize);
+                            if walkable && !mob_blocking {
+                                let current_box_pos_idx =
+                                    (next_p_ty as usize) * map_width + (next_p_tx as usize);
 
-                            if let Some(box_idx) = curr_state.mob_grid[current_box_pos_idx] {
-                                can_continue = true;
-                                transition_to_push = Some((
-                                    box_idx,
-                                    next_p_tx,
-                                    next_p_ty,
-                                    next_box_tx,
-                                    next_box_ty,
-                                    dx,
-                                    dy,
-                                ));
+                                if let Some(box_idx) = curr_state.mob_grid[current_box_pos_idx] {
+                                    can_continue = true;
+                                    transition_to_push = Some((
+                                        box_idx,
+                                        next_p_tx,
+                                        next_p_ty,
+                                        next_box_tx,
+                                        next_box_ty,
+                                        dx,
+                                        dy,
+                                    ));
+                                }
                             }
                         }
                     }
@@ -330,28 +332,26 @@ pub fn make_step(
 
     // Mob (box) update
     for unit in curr_state.mobs.iter_mut() {
-        match &mut unit.movement {
-            UnitMovement::Moving {
-                start_x,
-                start_y,
-                target_x,
-                target_y,
-                elapsed_time,
-                duration,
-            } => {
-                *elapsed_time += delta;
-                let progress = (*elapsed_time / *duration).min(1.0);
+        if let UnitMovement::Moving {
+            start_x,
+            start_y,
+            target_x,
+            target_y,
+            elapsed_time,
+            duration,
+        } = &mut unit.movement
+        {
+            *elapsed_time += delta;
+            let progress = (*elapsed_time / *duration).min(1.0);
 
-                unit.pixel_x = lerp(*start_x, *target_x, progress);
-                unit.pixel_y = lerp(*start_y, *target_y, progress);
+            unit.pixel_x = lerp(*start_x, *target_x, progress);
+            unit.pixel_y = lerp(*start_y, *target_y, progress);
 
-                if progress >= 1.0 {
-                    unit.pixel_x = *target_x;
-                    unit.pixel_y = *target_y;
-                    unit.movement = UnitMovement::Idle;
-                }
+            if progress >= 1.0 {
+                unit.pixel_x = *target_x;
+                unit.pixel_y = *target_y;
+                unit.movement = UnitMovement::Idle;
             }
-            _ => {}
         }
     }
 

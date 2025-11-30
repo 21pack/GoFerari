@@ -376,7 +376,7 @@ impl Render {
     ///
     /// * `frame` - Sprite frame to render from the entity atlas
     /// * `screen_x` - X position in screen coordinates (output buffer space)
-    /// * `screen_y` - Y position in screen coordinates (output buffer space)  
+    /// * `screen_y` - Y position in screen coordinates (output buffer space)
     /// * `atlas` - Sprite atlas for map elements
     fn render_shadow(&mut self, frame: &Frame, screen_x: i32, screen_y: i32, atlas: &Atlas) {
         let (atlas_w, atlas_h) = atlas.image.dimensions();

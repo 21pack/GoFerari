@@ -100,10 +100,8 @@ fn main() {
     let entities_path = assets_path.join("entities/atlas.json");
     // let alphabet_path = assets_path.join("alphabet/atlas.json");
 
-    let ground_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
+    let tiles_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
-    // let alphabet_atlas = assets::Atlas::load(alphabet_path.to_str().unwrap()).unwrap();
-    let tiles_atlas = ground_atlas.clone();
 
     // parse game descr
     let menu_path = project_root.join("examples/menu.json");
@@ -151,11 +149,11 @@ fn main() {
     .unwrap();
 
     let (mut render, mut camera, mut state) =
-        init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
+        init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
 
     // cringe cast since cringe types :)
     fn cast(tile_z: i32) -> u32 {
-        u32::try_from(tile_z).ok().expect("fail bounds")
+        u32::try_from(tile_z).expect("fail bounds")
     }
 
     // game loop
@@ -173,12 +171,11 @@ fn main() {
 
             let level_path = project_root.join(level_path);
             let loaded_game = assets::GameMap::load(level_path).unwrap();
-            let tiles_atlas =
-                if cur_level2 == 0 { ground_atlas.clone() } else { ground_atlas.clone() };
             game = loaded_game.clone();
             cur_level = cur_level2;
 
-            (render, camera, state) = init_level(game.clone(), entities_atlas.clone(), tiles_atlas);
+            (render, camera, state) =
+                init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
         }
 
         #[cfg(target_os = "macos")]
@@ -218,18 +215,17 @@ fn main() {
                     // not selected yet
                     Some(unit) => {
                         let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
-                        match (
+
+                        if let (world::UnitMovement::Idle, world::UnitMovement::Idle, Some(&id)) = (
                             unit.movement.clone(),
                             player.movement.clone(),
                             game.links.get(&(x, y)),
                         ) {
-                            (world::UnitMovement::Idle, world::UnitMovement::Idle, Some(&id)) => {
-                                cur_level2 = id;
-                                suc_boxes.push((unit.tile_x, unit.tile_y));
-                                break;
-                            }
-                            _ => (),
+                            cur_level2 = id;
+                            suc_boxes.push((unit.tile_x, unit.tile_y));
+                            break;
                         }
+
                         pos += 1;
                     }
                 }
@@ -260,12 +256,9 @@ fn main() {
                             _ => (),
                         };
                         if acc == 0 {
-                            match player.movement.clone() {
-                                world::UnitMovement::Idle => {
-                                    cur_level2 = 0;
-                                    break;
-                                }
-                                _ => (),
+                            if let world::UnitMovement::Idle = player.movement.clone() {
+                                cur_level2 = 0;
+                                break;
                             };
                         }
                         pos += 1;
@@ -281,12 +274,10 @@ fn main() {
             .map(|(i, unit)| {
                 let sprite_name = if i == 0 {
                     get_player_sprite(&state.player, time.total as f64)
+                } else if suc_boxes.contains(&(unit.tile_x, unit.tile_y)) {
+                    "green_box".to_string()
                 } else {
-                    if suc_boxes.contains(&(unit.tile_x, unit.tile_y)) {
-                        "green_box".to_string()
-                    } else {
-                        "box".to_string()
-                    }
+                    "box".to_string()
                 };
 
                 RenderableEntity::new(unit.pixel_x, unit.pixel_y, sprite_name)

@@ -2,7 +2,7 @@ use serde::Deserialize;
 use std::collections::{HashMap, LinkedList};
 use std::error::Error;
 use std::fs::File;
-use std::io::{copy, BufReader};
+use std::io::BufReader;
 use std::path::Path;
 use std::vec;
 
@@ -67,9 +67,10 @@ pub struct JsonObject {
 }
 
 /// Tile type that defines its properties in game logic.
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Default, Deserialize, Debug, Clone)]
 pub enum TileType {
     /// Passable empty tile
+    #[default]
     #[serde(rename = "empty")]
     Empty,
     /// Impenetrable wall
@@ -82,12 +83,6 @@ pub enum TileType {
     /// Link to some id (e.g. map id )
     #[serde(rename = "link")]
     Link(u32),
-}
-
-impl Default for TileType {
-    fn default() -> Self {
-        TileType::Empty
-    }
 }
 
 /// Tile data from JSON.
