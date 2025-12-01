@@ -1,20 +1,50 @@
-# Ferari
-![CI Status](https://github.com/suvorovrain/Ferari/actions/workflows/ci.yml/badge.svg)
+# GoFerari
 
-Fast Engine for Rendering Axonometric Rust-based Isometry.
+![CI Status](https://github.com/21pack/GoFerari/actions/workflows/ci.yml/badge.svg)
+
+Game on [Ferari](https://github.com/suvorovrain/Ferari) (Fast Engine for Rendering Axonometric Rust-based Isometry).
+
+Currently, x86_64 Linux and ARM64 macOS platforms are supported.
+
 ## Description
-An isometric engine that allows you to create simple games with static objects and mobs.
-## Authors
-* Rodion Suvorov. [GitHub](https://github.com/suvorovrain), [Contact](https://t.me/suvorovrain).
-* Ilhom Kombaev. [GitHub](https://github.com/homka122), [Contact](https://t.me/homka122).
-* Vyacheslav Kochergin. [GitHub](https://github.com/VyacheslavIurevich), [Contact](https://t.me/se4life).
-* Dmitri Kuznetsov. [GitHub](https://github.com/f1i3g3), [Contact](https://t.me/f1i3g3).
-## Platforms
-Currently, x86_64 Linux and Windows platforms are supported
+
+An isometric game with puzzle genre such as [Sokoban](https://en.wikipedia.org/wiki/Sokoban). The aim of the game is to get the boxes onto storage locations.
+
+### Mechanics
+
+* Player: You control the worker. Move up, down, left, or right.
+* Boxes: Push the boxes, one at a time. You cannot pull them or push two boxes at once.
+* Walls: Solid grey blocks form the immovable barriers. They confine your and boxes movement.
+* Target Docks: Indented floor tiles mark the delivery targets where the boxes must be placed.
+* Box States:
+  * Light Box: A box that is not yet on a target.
+  * Dark Box: A box that has been successfully pushed onto a target dock.
+
 ## Usage
-* Download release archive from GitHub releases page
-* Put your custom map information into `input.json` file in the root of unpacked archive, according format from example in the root of repository
+
+### Install
+
+* Download release archive from GitHub releases page.
+* Clone and build this repo.
+
+### Play
+
+```shell
+./play.sh
+```
+
+### Control
+
+The player moves on a grid-based system with fixed-direction controls. This means each key consistently moves the character in one cardinal direction, regardless of the on-screen perspective.
+
+* `WASD` or `arrow control`: movement;
+* `<-`(`A`) + `->`(`D`): go to menu;
+* `esc`: close game.
+
 ## Dependencies
+
+### Linux
+
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 sudo apt install cargo
@@ -23,23 +53,29 @@ rustup component add rustfmt
 rustup component add clippy
 cargo install cargo-tarpaulin
 ```
-## Development
+
+### macOS
+
+```shell
+brew install rustup
+rustup-init
+```
+
+## Development (Ferari)
+
 * See [CONTRIBUTING.md](./CONTRIBUTING.md)
 * Compile & run demo via `cargo run -p demo`
 * View docs via `cargo doc` (use  --document-private-items if you want)
 * Format your code via `cargo fmt`
 * Everything else - in CI
 
-## Benchmark
+## Authors
 
-### Machine info:
-OS: Kubuntu 24.04
-CPU: Intel Core i7-12700H
-RAM: 16 GB
-| Mobs Count | Average FPS |
-|-------------|-------------|
-| 500         |    40       |
-| 5000         |       15      |
-| 10000        |      10       |
-| 100000        |      4       |
-| 1000000        |      0.7       |
+* **Maxim Rodionov:** [GitHub](https://github.com/RodionovMaxim05), [Telegram](https://t.me/Maxoon22)
+* **Dmitri Chirkov:** [GitHub](https://github.com/kinokotakenoko9), [Telegram](https://t.me/chdmitri)
+* **Nikita Shchutskii:** [GitHub](https://github.com/ns-58), [Telegram](https://t.me/szcz00)
+* **Vladimir Zaikin:** [GitHub](https://github.com/Friend-zva), [Telegram](https://t.me/vo_va_w)
+
+## License
+
+Distributed under the [MIT License](https://choosealicense.com/licenses/mit/). See [`LICENSE`](LICENSE) for more information.

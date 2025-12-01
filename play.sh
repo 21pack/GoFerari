@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cd demo && cargo run
+cargo run -p demo
