@@ -2,6 +2,34 @@ use crate::{initiator::lerp, input::InputSnapshot, MOVEMENT_SPEEDUP, TILE_SIZE};
 
 use ferari::world::{Direction, State, Unit, UnitMovement};
 
+/// Data required to start a box-pushing animation.
+type PushTransition = (usize, i32, i32, i32, i32, i32, i32);
+
+/// Pixel coordinates for recoil animation (start_x, start_y, target_x, target_y).
+type PostPushTransition = (f32, f32, f32, f32);
+
+/// Result of player animation update: busy status and optional transition data.
+#[derive(Default)]
+struct PlayerAnimationResult {
+    /// Whether the player is currently busy with an animation
+    pub player_is_busy: bool,
+    /// Parameters to initiate a box-pushing sequence
+    pub transition_to_push: Option<PushTransition>,
+    /// Pixel coordinates to start a recoil animation
+    pub transition_to_post: Option<PostPushTransition>,
+}
+
+/// Time to walk one tile (player walking).
+const MOVE_DURATION: f32 = 0.35 / MOVEMENT_SPEEDUP;
+/// Time to approach a box before pushing.
+const PRE_PUSH_DURATION: f32 = 0.40 / MOVEMENT_SPEEDUP;
+/// Recoil animation time after pushing (not speed-scaled).
+const POST_PUSH_DURATION: f32 = 0.50;
+/// Time for a box to slide one tile.
+const BOX_MOVE_DURATION: f32 = 1.25 / MOVEMENT_SPEEDUP;
+/// Duration of the player's pushing animation.
+const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
+
 /// Computes the pixel offset (in isometric coordinates) for moving in a given direction by a specified magnitude.
 ///
 /// The direction is specified as integer deltas (`dir_x`, `dir_y`), where only one of the components is
@@ -68,12 +96,12 @@ fn get_dir_delta(dir: Direction) -> (i32, i32) {
 ///
 /// # Returns
 ///
-/// A tuple containing:
+/// A [`PlayerAnimationResult`] containing:
 /// * `player_is_busy`: `true` if the player is currently in any non-idle animation.
 /// * `transition_to_push`: parameters to initiate a box-pushing sequence
-///     (if a PrePushing or Pushing animation just completed and chain-push is possible).
+///   (if a PrePushing or Pushing animation just completed and chain-push is possible).
 /// * `transition_to_post`: pixel coordinates to start a recoil animation
-///     (if Pushing just completed without chain-push).
+///   (if Pushing just completed without chain-push).
 fn update_player_animation(
     unit: &mut Unit,
     delta: f32,
@@ -81,7 +109,7 @@ fn update_player_animation(
     mob_grid: &[Option<usize>],
     game: &ferari::assets::GameMap,
     map_width: usize,
-) -> (bool, Option<(usize, i32, i32, i32, i32, i32, i32)>, Option<(f32, f32, f32, f32)>) {
+) -> PlayerAnimationResult {
     let mut player_is_busy = false;
 
     // Walking between phases of approaching or going back to box/tile.
@@ -246,7 +274,7 @@ fn update_player_animation(
         UnitMovement::Idle => {}
     }
 
-    (player_is_busy, transition_to_push, transition_to_post)
+    PlayerAnimationResult { player_is_busy, transition_to_push, transition_to_post }
 }
 
 /// Applies the state changes required to begin a box-pushing animation sequence.
@@ -260,26 +288,19 @@ fn update_player_animation(
 ///
 /// * `state` - mutable game state to update player, mobs, and grid
 /// * `box_idx` - index of the box in `state.mobs` to be pushed
-/// * `p_tx`, `p_ty` - player's new tile coordinates after moving adjacent to the box
-/// * `b_tx`, `b_ty` - box's new tile coordinates after being pushed
-/// * `dx`, `dy` - direction of the push as tile deltas
+/// * `(p_tx, p_ty)` - player's new tile coordinates after moving adjacent to the box
+/// * `(b_tx, b_ty)` - box's new tile coordinates after being pushed
+/// * `(dx, dy)` - direction of the push as tile deltas
 /// * `map_width` - map width in tiles
 /// * `delta` - frame time
-/// * `box_duration` - duration of the box's movement animation
-/// * `push_duration` - duration of the player's pushing animation
 fn apply_push_transition(
     state: &mut State,
     box_idx: usize,
-    p_tx: i32,
-    p_ty: i32,
-    b_tx: i32,
-    b_ty: i32,
-    dx: i32,
-    dy: i32,
+    (p_tx, p_ty): (i32, i32),
+    (b_tx, b_ty): (i32, i32),
+    (dx, dy): (i32, i32),
     map_width: usize,
     delta: f32,
-    box_duration: f32,
-    push_duration: f32,
 ) {
     let old_box_idx = (p_ty as usize) * map_width + (p_tx as usize);
     let new_box_idx = (b_ty as usize) * map_width + (b_tx as usize);
@@ -299,7 +320,7 @@ fn apply_push_transition(
             target_x: target_bx,
             target_y: target_by,
             elapsed_time: 0.0 - delta,
-            duration: box_duration,
+            duration: BOX_MOVE_DURATION,
         };
         box_unit.tile_x = b_tx;
         box_unit.tile_y = b_ty;
@@ -318,7 +339,7 @@ fn apply_push_transition(
             target_x: push_target_x,
             target_y: push_target_y,
             elapsed_time: 0.0,
-            duration: push_duration,
+            duration: PUSH_DURATION,
             recoil_target_x: settle_x,
             recoil_target_y: settle_y,
         };
@@ -335,16 +356,12 @@ fn apply_push_transition(
 /// # Arguments
 ///
 /// * `player` - mutable reference to the player's unit
-/// * `start_x`, `start_y` - starting pixel position (end of push animation)
-/// * `target_x`, `target_y` - target pixel position (settled recoil position)
-/// * `duration` - duration of the recoil animation
+/// * `(start_x, start_y)` - starting pixel position (end of push animation)
+/// * `(target_x, target_y)` - target pixel position (settled recoil position)
 fn apply_post_push_transition(
     player: &mut Unit,
-    start_x: f32,
-    start_y: f32,
-    target_x: f32,
-    target_y: f32,
-    duration: f32,
+    (start_x, start_y): (f32, f32),
+    (target_x, target_y): (f32, f32),
 ) {
     player.movement = UnitMovement::PostPushing {
         start_x,
@@ -352,7 +369,7 @@ fn apply_post_push_transition(
         target_x,
         target_y,
         elapsed_time: 0.0,
-        duration: duration,
+        duration: POST_PUSH_DURATION,
     };
 }
 
@@ -402,21 +419,16 @@ fn update_mob_animations(mobs: &mut [Unit], delta: f32) {
 /// # Arguments
 ///
 /// * `player` - mutable reference to the player's unit
-/// * `dx`, `dy` - push direction as tile deltas
+/// * `(dx, dy)` - push direction as tile deltas
 /// * `box_idx` - index of the box to be pushed
-/// * `player_next_tx`, `player_next_ty` - player's tile position after moving adjacent to the box
-/// * `box_next_tx`, `box_next_ty` - box's destination tile after being pushed
-/// * `duration` - duration of the approach animation
+/// * `(player_next_tx, player_next_ty)` - player's tile position after moving adjacent to the box
+/// * `(box_next_tx, box_next_ty)` - box's destination tile after being pushed
 fn start_pre_push_animation(
     player: &mut Unit,
-    dx: i32,
-    dy: i32,
+    (dx, dy): (i32, i32),
     box_idx: usize,
-    player_next_tx: i32,
-    player_next_ty: i32,
-    box_next_tx: i32,
-    box_next_ty: i32,
-    duration: f32,
+    (player_next_tx, player_next_ty): (i32, i32),
+    (box_next_tx, box_next_ty): (i32, i32),
 ) {
     let (px, py) = (player.pixel_x, player.pixel_y);
     let (offset_x, offset_y) = get_offset(dx, dy, 0.5);
@@ -429,7 +441,7 @@ fn start_pre_push_animation(
         target_x: mid_x,
         target_y: mid_y,
         elapsed_time: 0.0,
-        duration: duration,
+        duration: PRE_PUSH_DURATION,
         box_idx,
         player_next_tx,
         player_next_ty,
@@ -448,16 +460,12 @@ fn start_pre_push_animation(
 /// # Arguments
 ///
 /// * `player` - mutable reference to the player's unit
-/// * `dx`, `dy` - movement direction as tile deltas
-/// * `next_tx`, `next_ty` - destination tile coordinates
-/// * `duration` - duration of the walking animation
+/// * `(dx, dy)` - movement direction as tile deltas
+/// * `(next_tx, next_ty)` - destination tile coordinates
 fn start_walking_animation(
     player: &mut Unit,
-    dx: i32,
-    dy: i32,
-    next_tx: i32,
-    next_ty: i32,
-    duration: f32,
+    (dx, dy): (i32, i32),
+    (next_tx, next_ty): (i32, i32),
 ) {
     let (px, py) = (player.pixel_x, player.pixel_y);
     let (offset_x, offset_y) = get_offset(dx, dy, 1.0);
@@ -468,7 +476,7 @@ fn start_walking_animation(
         target_x: px + offset_x,
         target_y: py + offset_y,
         elapsed_time: 0.0,
-        duration: duration,
+        duration: MOVE_DURATION,
     };
     player.tile_x = next_tx;
     player.tile_y = next_ty;
@@ -506,12 +514,6 @@ pub fn make_step(
     delta: f32,
     game: &ferari::assets::GameMap,
 ) -> Option<u32> {
-    const MOVE_DURATION: f32 = 0.35 / MOVEMENT_SPEEDUP;
-    const PRE_PUSH_DURATION: f32 = 0.40 / MOVEMENT_SPEEDUP;
-    const POST_PUSH_DURATION: f32 = 0.50;
-    const BOX_MOVE_DURATION: f32 = 1.25 / MOVEMENT_SPEEDUP;
-    const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
-
     let map_width = game.size[0] as usize;
 
     // ============================================
@@ -519,14 +521,15 @@ pub fn make_step(
     // ============================================
 
     // Player update
-    let (mut player_is_busy, transition_to_push, transition_to_post) = update_player_animation(
-        &mut curr_state.player.unit,
-        delta,
-        input_state,
-        &curr_state.mob_grid,
-        game,
-        map_width,
-    );
+    let PlayerAnimationResult { mut player_is_busy, transition_to_push, transition_to_post } =
+        update_player_animation(
+            &mut curr_state.player.unit,
+            delta,
+            input_state,
+            &curr_state.mob_grid,
+            game,
+            map_width,
+        );
 
     if let Some((box_idx, p_tx, p_ty, b_tx, b_ty, dx, dy)) = transition_to_push {
         player_is_busy = true;
@@ -534,23 +537,18 @@ pub fn make_step(
         apply_push_transition(
             curr_state,
             box_idx,
-            p_tx,
-            p_ty,
-            b_tx,
-            b_ty,
-            dx,
-            dy,
+            (p_tx, p_ty),
+            (b_tx, b_ty),
+            (dx, dy),
             map_width,
             delta,
-            BOX_MOVE_DURATION,
-            PUSH_DURATION,
         );
     }
 
     if let Some((sx, sy, tx, ty)) = transition_to_post {
         player_is_busy = true;
 
-        apply_post_push_transition(&mut curr_state.player.unit, sx, sy, tx, ty, POST_PUSH_DURATION);
+        apply_post_push_transition(&mut curr_state.player.unit, (sx, sy), (tx, ty));
     }
 
     // Mob (box) update
@@ -639,24 +637,13 @@ pub fn make_step(
         // perform pre push
         start_pre_push_animation(
             &mut curr_state.player.unit,
-            dx,
-            dy,
+            (dx, dy),
             box_idx,
-            next_tx,
-            next_ty,
-            behind_tx,
-            behind_ty,
-            PRE_PUSH_DURATION,
+            (next_tx, next_ty),
+            (behind_tx, behind_ty),
         );
     } else {
-        start_walking_animation(
-            &mut curr_state.player.unit,
-            dx,
-            dy,
-            next_tx,
-            next_ty,
-            MOVE_DURATION,
-        );
+        start_walking_animation(&mut curr_state.player.unit, (dx, dy), (next_tx, next_ty));
     }
 
     None

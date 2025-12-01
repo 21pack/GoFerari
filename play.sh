@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cargo run -p game
+cargo run -p game --release

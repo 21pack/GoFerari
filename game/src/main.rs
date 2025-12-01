@@ -24,7 +24,7 @@ mod initiator;
 
 use ferari::render::RenderableEntity;
 
-/// Animation and movement speedup
+/// Animation and movement speedup.
 pub const MOVEMENT_SPEEDUP: f32 = 1.0;
 /// Upscaling factor for display.
 pub const UPSCALE: usize = 2;
