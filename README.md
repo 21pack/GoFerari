@@ -64,7 +64,7 @@ rustup-init
 ## Development (Ferari)
 
 * See [CONTRIBUTING.md](./CONTRIBUTING.md)
-* Compile & run demo via `cargo run -p demo`
+* Compile & run game via `cargo run -p game`
 * View docs via `cargo doc` (use  --document-private-items if you want)
 * Format your code via `cargo fmt`
 * Everything else - in CI

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cargo run -p demo
+cargo run -p game
