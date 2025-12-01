@@ -90,8 +90,7 @@ fn init_level(
 
 fn main() {
     // Need to find root directory
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let project_root = manifest_dir.join("..");
+    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
 
     let assets_path = project_root.join("assets");
 
@@ -104,9 +103,8 @@ fn main() {
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
 
     // parse game descr
-    let menu_path = project_root.join("examples/menu.json");
-    let game0 = assets::GameMap::load(menu_path).unwrap();
-    let mut game = game0.clone();
+    let menu_path = project_root.join("game_levels/menu.json");
+    let mut game = assets::GameMap::load(menu_path).unwrap();
 
     let mut cur_level = 0;
     let mut cur_level2 = 0;
@@ -121,6 +119,8 @@ fn main() {
 
     // init time
     let mut time = time::Time::new();
+
+    // Platform-specific draw thread
 
     #[cfg(target_os = "linux")]
     {
@@ -160,12 +160,12 @@ fn main() {
     while running.load(Ordering::Acquire) {
         if cur_level != cur_level2 {
             let level_path = match cur_level2 {
-                0 => "examples/menu.json",
-                1 => "examples/level1.json",
-                2 => "examples/level2.json",
-                3 => "examples/level3.json",
-                4 => "examples/level4.json",
-                5 => "examples/level5.json",
+                0 => "game_levels/menu.json",
+                1 => "game_levels/level1.json",
+                2 => "game_levels/level2.json",
+                3 => "game_levels/level3.json",
+                4 => "game_levels/level4.json",
+                5 => "game_levels/level5.json",
                 _ => continue,
             };
 
