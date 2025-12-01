@@ -56,6 +56,23 @@ macro_rules! update_window {
     };
 }
 
+/// Initializes all core systems required to start a new game level.
+///
+/// This function sets up the rendering pipeline, camera, and game state based on
+/// the provided level data and graphical assets.
+///
+/// # Arguments
+///
+/// * `game` – the preloaded game map containing layout, walkability, and object placement
+/// * `entities_atlas` – texture atlas containing sprites for dynamic entities
+/// * `tiles_atlas` – texture atlas containing static tile graphics
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * [`ferari::Render`] - the fully initialized renderer with pre-rendered static background.
+/// * [`world::Camera`] - a camera centered on the level, configured to the logical screen dimensions.
+/// * [`world::State`] - the initial game state (player position, mob positions, grid occupancy, etc.).
 fn init_level(
     game: assets::GameMap,
     entities_atlas: assets::Atlas,

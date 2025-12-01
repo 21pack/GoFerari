@@ -2,7 +2,20 @@ use crate::{initiator::lerp, input::InputSnapshot, MOVEMENT_SPEEDUP, TILE_SIZE};
 
 use ferari::world::{Direction, State, Unit, UnitMovement};
 
-// Helper to returns (x, y) offset for a specific direction and magnitude. magnitude = 1.0 is one tile
+/// Computes the pixel offset (in isometric coordinates) for moving in a given direction by a specified magnitude.
+///
+/// The direction is specified as integer deltas (`dir_x`, `dir_y`), where only one of the components is
+/// non-zero (e.g., `(1, 0)` for southeast).
+/// The `magnitude` parameter scales the movement: `1.0` corresponds to moving exactly one tile.
+///
+/// # Arguments
+///
+/// * `dir_x`, `dir_y` - The X and Y component of the direction (-1, 0, or 1)
+/// * `magnitude` - The scaling factor for the movement
+///
+/// # Returns
+///
+/// A tuple `(offset_x, offset_y)` in pixel coordinates.
 fn get_offset(dir_x: i32, dir_y: i32, magnitude: f32) -> (f32, f32) {
     let tile_w = TILE_SIZE as f32;
     let tile_h = (TILE_SIZE as f32) * 0.5;
@@ -19,7 +32,17 @@ fn get_offset(dir_x: i32, dir_y: i32, magnitude: f32) -> (f32, f32) {
     }
 }
 
-// Helper to map enum Direction to (dx, dy)
+/// Maps a logical `Direction` enum value to its corresponding tile-based movement delta.
+///
+/// # Arguments
+///
+/// * `dir` - The direction to convert
+///
+/// # Returns
+///
+/// A tuple `(dx, dy)` where:
+/// - `dx`: change in tile X-coordinate (+1 for SE/NW axis, 0 otherwise)
+/// - `dy`: change in tile Y-coordinate (+1 for SW/NE axis, 0 otherwise)
 fn get_dir_delta(dir: Direction) -> (i32, i32) {
     match dir {
         Direction::SE => (1, 0),
@@ -29,6 +52,28 @@ fn get_dir_delta(dir: Direction) -> (i32, i32) {
     }
 }
 
+/// Updates the player's animation state based on elapsed time and input.
+///
+/// This function handles all player animation phases: idle, walking, pre-pushing,
+/// pushing (including chain-push logic), and post-pushing recoil.
+///
+/// # Arguments
+///
+/// * `unit` - mutable reference to the player's unit to update its pixel position and movement state
+/// * `delta` - time elapsed since the last frame (in seconds)
+/// * `input_state` - current input snapshot used to detect continuous push input
+/// * `mob_grid` - read-only grid indicating which mob (if any) occupies each tile
+/// * `game` - game map used for walkability and collision checks during chain pushes
+/// * `map_width` - width of the map in tiles
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * `player_is_busy`: `true` if the player is currently in any non-idle animation.
+/// * `transition_to_push`: parameters to initiate a box-pushing sequence
+///     (if a PrePushing or Pushing animation just completed and chain-push is possible).
+/// * `transition_to_post`: pixel coordinates to start a recoil animation
+///     (if Pushing just completed without chain-push).
 fn update_player_animation(
     unit: &mut Unit,
     delta: f32,
@@ -204,6 +249,24 @@ fn update_player_animation(
     (player_is_busy, transition_to_push, transition_to_post)
 }
 
+/// Applies the state changes required to begin a box-pushing animation sequence.
+///
+/// This function:
+/// 1. Updates `mob_grid` to reflect the box's new position.
+/// 2. Starts the box's `Moving` animation toward its destination.
+/// 3. Starts the player's `Pushing` animation (with recoil target for post-push).
+///
+/// # Arguments
+///
+/// * `state` - mutable game state to update player, mobs, and grid
+/// * `box_idx` - index of the box in `state.mobs` to be pushed
+/// * `p_tx`, `p_ty` - player's new tile coordinates after moving adjacent to the box
+/// * `b_tx`, `b_ty` - box's new tile coordinates after being pushed
+/// * `dx`, `dy` - direction of the push as tile deltas
+/// * `map_width` - map width in tiles
+/// * `delta` - frame time
+/// * `box_duration` - duration of the box's movement animation
+/// * `push_duration` - duration of the player's pushing animation
 fn apply_push_transition(
     state: &mut State,
     box_idx: usize,
@@ -264,6 +327,17 @@ fn apply_push_transition(
     }
 }
 
+/// Initiates the player's recoil animation after completing a push.
+///
+/// This sets the player's movement state to `PostPushing`, animating from
+/// the pushing endpoint back to the settled position over the specified duration.
+///
+/// # Arguments
+///
+/// * `player` - mutable reference to the player's unit
+/// * `start_x`, `start_y` - starting pixel position (end of push animation)
+/// * `target_x`, `target_y` - target pixel position (settled recoil position)
+/// * `duration` - duration of the recoil animation
 fn apply_post_push_transition(
     player: &mut Unit,
     start_x: f32,
@@ -282,6 +356,17 @@ fn apply_post_push_transition(
     };
 }
 
+/// Updates animations for all non-player mobile units (e.g., boxes).
+///
+/// For each mob in `Moving` state, this function:
+/// - Advances the animation by `delta` seconds.
+/// - Interpolates the pixel position using linear interpolation (`lerp`).
+/// - Sets the mob to `Idle` when the animation completes.
+///
+/// # Arguments
+///
+/// * `mobs` - slice of mutable mob units to update
+/// * `delta` - time elapsed since the last frame
 fn update_mob_animations(mobs: &mut [Unit], delta: f32) {
     for unit in mobs.iter_mut() {
         if let UnitMovement::Moving {
@@ -308,6 +393,20 @@ fn update_mob_animations(mobs: &mut [Unit], delta: f32) {
     }
 }
 
+/// Initiates the "approach" animation before pushing a box.
+///
+/// The player moves halfway toward the box (0.5 tile magnitude) to prepare for the push.
+/// Sets the player's movement state to `PrePushing` with parameters needed to transition
+/// to full pushing once the approach completes.
+///
+/// # Arguments
+///
+/// * `player` - mutable reference to the player's unit
+/// * `dx`, `dy` - push direction as tile deltas
+/// * `box_idx` - index of the box to be pushed
+/// * `player_next_tx`, `player_next_ty` - player's tile position after moving adjacent to the box
+/// * `box_next_tx`, `box_next_ty` - box's destination tile after being pushed
+/// * `duration` - duration of the approach animation
 fn start_pre_push_animation(
     player: &mut Unit,
     dx: i32,
@@ -341,6 +440,17 @@ fn start_pre_push_animation(
     };
 }
 
+/// Initiates a standard walking animation for the player.
+///
+/// Moves the player by one full tile in the specified direction.
+/// Updates both the animation state (pixel position over time) and the logical tile position.
+///
+/// # Arguments
+///
+/// * `player` - mutable reference to the player's unit
+/// * `dx`, `dy` - movement direction as tile deltas
+/// * `next_tx`, `next_ty` - destination tile coordinates
+/// * `duration` - duration of the walking animation
 fn start_walking_animation(
     player: &mut Unit,
     dx: i32,
@@ -364,6 +474,32 @@ fn start_walking_animation(
     player.tile_y = next_ty;
 }
 
+/// Advances the game simulation by one time step.
+///
+/// This is the core game loop function that:
+/// 1. Updates all animations (player and mobs).
+/// 2. Processes player input (if not busy with animations).
+/// 3. Handles movement and box-pushing logic with collision detection.
+///
+/// # Arguments
+///
+/// * `curr_state` - mutable game state (player, mobs, grid)
+/// * `input_state` - current player input (directional buttons)
+/// * `delta` - time elapsed since last frame (for animation timing)
+/// * `game` - static game map (walkability, collidable objects)
+///
+/// # Returns
+///
+/// * `Some(0)` if a special key combination is pressed.
+/// * `None` otherwise (successful step with or without movement).
+///
+/// # Animation States Handled
+///
+/// - `Idle`: ready for input.
+/// - `Moving`: walking between tiles.
+/// - `PrePushing`: approaching a box to push.
+/// - `Pushing`: actively pushing a box (supports chain-pushes).
+/// - `PostPushing`: recoiling after a push.
 pub fn make_step(
     curr_state: &mut State,
     input_state: &InputSnapshot,
@@ -525,141 +661,3 @@ pub fn make_step(
 
     None
 }
-
-// TODO: rewrite
-// #[cfg(test)]
-// mod tests {
-//     use super::State;
-//     use crate::assets::GameMap;
-
-//     use super::*;
-
-//     #[test]
-//     fn test_abs_vector_zero() {
-//         assert_eq!(abs_vector((0.0, 0.0)), 0.0);
-//     }
-
-//     #[test]
-//     fn test_abs_vector_nonzero() {
-//         let len = abs_vector((3.0, 4.0));
-//         assert!((len - 5.0).abs() < 1e-5);
-//     }
-
-//     #[test]
-//     fn test_normalize_vector_basic() {
-//         let n = normalize_vector((3.0, 4.0));
-//         assert!(((n.0 * n.0 + n.1 * n.1).sqrt() - 1.0).abs() < 1e-5);
-//     }
-
-//     #[test]
-//     fn test_normalize_vector_small_vector_returns_zero() {
-//         let n = normalize_vector((0.01, 0.01));
-//         assert_eq!(n, (0.0, 0.0));
-//     }
-
-//     fn make_test_state() -> State {
-//         let game_map = GameMap::load("input.json").expect("failed to load game map for tests");
-
-//         let mut state = State::new(&game_map);
-
-//         state.player.x = 0.0;
-//         state.player.y = 0.0;
-//         state.player.x_speed = 0.0;
-//         state.player.y_speed = 0.0;
-
-//         if state.mobs.is_empty() {
-//             state.mobs.push(crate::world::Unit {
-//                 x: 100.0,
-//                 y: 0.0,
-//                 x_speed: -0.5,
-//                 y_speed: 0.0,
-//                 ..Default::default()
-//             });
-//         }
-
-//         state
-//     }
-
-//     #[test]
-//     fn test_player_moves_right() {
-//         let mut state = make_test_state();
-
-//         let input = crate::input::InputSnapshot {
-//             up: false,
-//             down: false,
-//             left: false,
-//             right: true,
-//             escape: false,
-//         };
-
-//         make_step(&mut state, &input);
-
-//         assert!((state.player.x - 0.75).abs() < 1e-5);
-//         assert!((state.player.y - 0.0).abs() < 1e-5);
-//     }
-
-//     #[test]
-//     fn test_player_moves_up_left_diagonal() {
-//         let mut state = make_test_state();
-
-//         let input = crate::input::InputSnapshot {
-//             up: true,
-//             down: false,
-//             left: true,
-//             right: false,
-//             escape: false,
-//         };
-
-//         make_step(&mut state, &input);
-
-//         let dx = state.player.x;
-//         let dy = state.player.y;
-//         let len = (dx * dx + dy * dy).sqrt();
-//         assert!((len - 0.75).abs() < 1e-5);
-//         assert!(dx < 0.0 && dy < 0.0);
-//     }
-
-//     #[test]
-//     fn test_mob_moves_toward_player() {
-//         let mut state = make_test_state();
-//         state.mobs[0].x = 50.0;
-//         state.mobs[0].y = 0.0;
-//         state.mobs[0].x_speed = -0.5;
-//         state.mobs[0].y_speed = 0.0;
-
-//         let input = crate::input::InputSnapshot {
-//             up: false,
-//             down: false,
-//             left: false,
-//             right: false,
-//             escape: false,
-//         };
-
-//         make_step(&mut state, &input);
-
-//         assert!(state.mobs[0].x < 50.0);
-//         assert!(state.mobs[0].y.abs() < 1e-3);
-//     }
-
-//     #[test]
-//     fn test_collision_pushes_mob_back() {
-//         let mut state = make_test_state();
-
-//         state.mobs[0].x = 2.0;
-//         state.mobs[0].y = 0.0;
-
-//         let input = crate::input::InputSnapshot {
-//             up: false,
-//             down: false,
-//             left: false,
-//             right: false,
-//             escape: false,
-//         };
-
-//         make_step(&mut state, &input);
-
-//         let vec_from = (state.mobs[0].x - state.player.x, state.mobs[0].y - state.player.y);
-//         let dist = (vec_from.0 * vec_from.0 + vec_from.1 * vec_from.1).sqrt();
-//         assert!((dist - 10.0).abs() < 1e-3);
-//     }
-// }
