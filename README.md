@@ -8,7 +8,7 @@ Currently, x86_64 Linux and ARM64 macOS platforms are supported.
 
 ## Description
 
-An isometric game with puzzle genre such as [Sokoban](https://en.wikipedia.org/wiki/Sokoban). The aim of the game is to get the boxes onto storage locations.
+An isometric game in puzzle genre such as [Sokoban](https://en.wikipedia.org/wiki/Sokoban). The aim of the game is to get the boxes onto storage locations.
 
 ### Mechanics
 
