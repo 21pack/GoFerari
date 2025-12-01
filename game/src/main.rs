@@ -34,6 +34,17 @@ pub const LOGIC_WIDTH: usize = 1280 / UPSCALE;
 pub const LOGIC_HEIGHT: usize = 720 / UPSCALE;
 /// Tile size in pixels.
 pub const TILE_SIZE: usize = 128;
+/// Filesystem paths to all available game levels.
+const LEVEL_PATHS: &[&str] = &[
+    "game_levels/menu.json",
+    "game_levels/level1.json",
+    "game_levels/level2.json",
+    "game_levels/level3.json",
+    "game_levels/level4.json",
+    "game_levels/level5.json",
+];
+/// Target frame duration for a stable gameplay loop.
+const FRAME_TIME: Duration = Duration::from_micros(16667); // ~60 FPS
 
 #[cfg(target_os = "macos")]
 macro_rules! update_window {
@@ -114,7 +125,6 @@ fn main() {
     // parse atlases
     let tiles_path = assets_path.join("tiles/atlas.json");
     let entities_path = assets_path.join("entities/atlas.json");
-    // let alphabet_path = assets_path.join("alphabet/atlas.json");
 
     let tiles_atlas = assets::Atlas::load(tiles_path.to_str().unwrap()).unwrap();
     let entities_atlas = assets::Atlas::load(entities_path.to_str().unwrap()).unwrap();
@@ -168,27 +178,13 @@ fn main() {
     let (mut render, mut camera, mut state) =
         init_level(game.clone(), entities_atlas.clone(), tiles_atlas.clone());
 
-    // cringe cast since cringe types :)
-    fn cast(tile_z: i32) -> u32 {
-        u32::try_from(tile_z).expect("fail bounds")
-    }
-
     // game loop
     while running.load(Ordering::Acquire) {
         if cur_level != cur_level2 {
-            let level_path = match cur_level2 {
-                0 => "game_levels/menu.json",
-                1 => "game_levels/level1.json",
-                2 => "game_levels/level2.json",
-                3 => "game_levels/level3.json",
-                4 => "game_levels/level4.json",
-                5 => "game_levels/level5.json",
-                _ => continue,
-            };
+            let level_path = project_root.join(LEVEL_PATHS[cur_level2 as usize]);
 
-            let level_path = project_root.join(level_path);
             let loaded_game = assets::GameMap::load(level_path).unwrap();
-            game = loaded_game.clone();
+            game = loaded_game;
             cur_level = cur_level2;
 
             (render, camera, state) =
@@ -215,71 +211,51 @@ fn main() {
         camera.center_y = state.player.unit.pixel_y.floor();
 
         let units_for_render = get_visible_objects(&state, &camera);
-
         if units_for_render.is_empty() {
             continue;
         }
 
         let mut suc_boxes = vec![];
-        let player = state.player.unit.clone();
-        // TODO refactor then and else
+
         // menu
         if cur_level == 0 {
-            let mut pos = 0;
-            loop {
-                match state.mobs.get(pos) {
-                    None => break,
-                    // not selected yet
-                    Some(unit) => {
-                        let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
+            let player_idle = matches!(state.player.unit.movement, world::UnitMovement::Idle);
 
-                        if let (world::UnitMovement::Idle, world::UnitMovement::Idle, Some(&id)) = (
-                            unit.movement.clone(),
-                            player.movement.clone(),
-                            game.links.get(&(x, y)),
-                        ) {
-                            cur_level2 = id;
-                            suc_boxes.push((unit.tile_x, unit.tile_y));
-                            break;
-                        }
+            for unit in &state.mobs {
+                if matches!(unit.movement, world::UnitMovement::Idle) & player_idle {
+                    let pos = (unit.tile_x as u32, unit.tile_y as u32);
 
-                        pos += 1;
+                    if let Some(&id) = game.links.get(&pos) {
+                        cur_level2 = id;
+                        suc_boxes.push((unit.tile_x, unit.tile_y));
+                        break;
                     }
                 }
             }
         }
-        // check if should to up the level
+        // gameplay level: check box placement and win condition
         else {
-            let goal = game.target_positions.len();
+            let goal_count = game.target_positions.len();
 
-            if goal == 0 {
+            if goal_count == 0 {
                 cur_level2 = 0;
-            }
-            let mut pos = 0;
-            let mut acc = goal;
-            loop {
-                match state.mobs.get(pos) {
-                    None => break,
-                    // not finished yet
-                    Some(unit) => {
-                        let (x, y) = (cast(unit.tile_x), cast(unit.tile_y));
-                        match unit.movement.clone() {
-                            world::UnitMovement::Idle
-                                if game.target_positions.contains(&(x, y)) =>
-                            {
-                                suc_boxes.push((unit.tile_x, unit.tile_y));
-                                acc -= 1;
-                            }
-                            _ => (),
-                        };
-                        if acc == 0 {
-                            if let world::UnitMovement::Idle = player.movement.clone() {
-                                cur_level2 = 0;
-                                break;
-                            };
+            } else {
+                let mut placed_count = 0;
+                let player_idle = matches!(state.player.unit.movement, world::UnitMovement::Idle);
+
+                for unit in &state.mobs {
+                    if matches!(unit.movement, world::UnitMovement::Idle) {
+                        let pos = (unit.tile_x as u32, unit.tile_y as u32);
+
+                        if game.target_positions.contains(&pos) {
+                            suc_boxes.push((unit.tile_x, unit.tile_y));
+                            placed_count += 1;
                         }
-                        pos += 1;
                     }
+                }
+
+                if placed_count == goal_count && player_idle {
+                    cur_level2 = 0;
                 }
             }
         }
@@ -309,7 +285,7 @@ fn main() {
         }
 
         // fps limit
-        thread::sleep(Duration::from_micros(16667)); // ~60 FPS
+        thread::sleep(FRAME_TIME);
     }
 
     println!("Main loop exited");
