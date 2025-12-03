@@ -184,86 +184,38 @@ mod tests {
 
     // Test atlas JSON parsing on example
     #[test]
-    fn test_load_entities_atlas() {
-        let atlas = Atlas::load("assets/tiles/atlas.json").unwrap();
+    fn test_load_tiles_atlas() {
+        let atlas = Atlas::load("../assets/tiles/atlas.json").unwrap();
 
-        assert_eq!(atlas.tile_size, 16);
+        assert_eq!(atlas.tile_size, 128);
         assert_eq!(atlas.version, 1);
 
-        assert_eq!(atlas.frame_count(), 11);
+        assert_eq!(atlas.frame_count(), 40);
 
-        assert!(atlas.contains_frame("dirt_tile_big_0_0"));
-        assert!(atlas.contains_frame("grass_tile_big_0_1"));
-        assert!(atlas.contains_frame("rock_tile_big_0_2"));
-        assert!(atlas.contains_frame("sand_tile_big_0_3"));
-        assert!(atlas.contains_frame("dirt_tile_small_1_0"));
-        assert!(atlas.contains_frame("grass_tile_small_1_1"));
-        assert!(atlas.contains_frame("rock_tile_small_1_2"));
-        assert!(atlas.contains_frame("sand_tile_small_1_3"));
-        assert!(atlas.contains_frame("cactus_long_3_9"));
-        assert!(atlas.contains_frame("fence_rising_11_10"));
-        assert!(atlas.contains_frame("fence_falling_10_10"));
+        assert!(atlas.contains_frame("floor"));
+        assert!(atlas.contains_frame("target"));
+        assert!(atlas.contains_frame("letter_1"));
 
-        let dirt_big_frame = atlas.get_frame("dirt_tile_big_0_0").unwrap();
-        assert_eq!(dirt_big_frame.name, "dirt_tile_big_0_0");
+        let dirt_big_frame = atlas.get_frame("floor").unwrap();
+        assert_eq!(dirt_big_frame.name, "floor");
         assert_eq!(dirt_big_frame.x, 0);
-        assert_eq!(dirt_big_frame.y, 1);
-        assert_eq!(dirt_big_frame.w, 16);
-        assert_eq!(dirt_big_frame.h, 16);
+        assert_eq!(dirt_big_frame.y, 1152);
+        assert_eq!(dirt_big_frame.w, 128);
+        assert_eq!(dirt_big_frame.h, 128);
 
-        let grass_big_frame = atlas.get_frame("grass_tile_big_0_1").unwrap();
-        assert_eq!(grass_big_frame.name, "grass_tile_big_0_1");
-        assert_eq!(grass_big_frame.x, 16);
-        assert_eq!(grass_big_frame.y, 0);
-        assert_eq!(grass_big_frame.w, 16);
-        assert_eq!(grass_big_frame.h, 17);
+        let grass_big_frame = atlas.get_frame("target").unwrap();
+        assert_eq!(grass_big_frame.name, "target");
+        assert_eq!(grass_big_frame.x, 128);
+        assert_eq!(grass_big_frame.y, 1152);
+        assert_eq!(grass_big_frame.w, 128);
+        assert_eq!(grass_big_frame.h, 128);
 
-        let dirt_small_frame = atlas.get_frame("dirt_tile_small_1_0").unwrap();
-        assert_eq!(dirt_small_frame.name, "dirt_tile_small_1_0");
-        assert_eq!(dirt_small_frame.x, 0);
-        assert_eq!(dirt_small_frame.y, 33);
-        assert_eq!(dirt_small_frame.w, 16);
-        assert_eq!(dirt_small_frame.h, 16);
-
-        let cactus_frame = atlas.get_frame("cactus_long_3_9").unwrap();
-        assert_eq!(cactus_frame.name, "cactus_long_3_9");
-        assert_eq!(cactus_frame.x, 148);
-        assert_eq!(cactus_frame.y, 52);
-        assert_eq!(cactus_frame.w, 10);
-        assert_eq!(cactus_frame.h, 16);
-
-        let fence_rising_frame = atlas.get_frame("fence_rising_11_10").unwrap();
-        assert_eq!(fence_rising_frame.name, "fence_rising_11_10");
-        assert_eq!(fence_rising_frame.x, 162);
-        assert_eq!(fence_rising_frame.y, 153);
-        assert_eq!(fence_rising_frame.w, 16);
-        assert_eq!(fence_rising_frame.h, 16);
-
-        let fence_falling_frame = atlas.get_frame("fence_falling_10_10").unwrap();
-        assert_eq!(fence_falling_frame.name, "fence_falling_10_10");
-        assert_eq!(fence_falling_frame.x, 162);
-        assert_eq!(fence_falling_frame.y, 136);
-        assert_eq!(fence_falling_frame.w, 16);
-        assert_eq!(fence_falling_frame.h, 16);
-
-        let mut frame_names: Vec<String> = atlas.iter_frames().map(|f| f.name.clone()).collect();
-        frame_names.sort();
-        assert_eq!(
-            frame_names,
-            vec![
-                "cactus_long_3_9",
-                "dirt_tile_big_0_0",
-                "dirt_tile_small_1_0",
-                "fence_falling_10_10",
-                "fence_rising_11_10",
-                "grass_tile_big_0_1",
-                "grass_tile_small_1_1",
-                "rock_tile_big_0_2",
-                "rock_tile_small_1_2",
-                "sand_tile_big_0_3",
-                "sand_tile_small_1_3"
-            ]
-        );
+        let dirt_small_frame = atlas.get_frame("letter_1").unwrap();
+        assert_eq!(dirt_small_frame.name, "letter_1");
+        assert_eq!(dirt_small_frame.x, 256);
+        assert_eq!(dirt_small_frame.y, 768);
+        assert_eq!(dirt_small_frame.w, 128);
+        assert_eq!(dirt_small_frame.h, 128);
 
         assert!(!atlas.image.is_empty());
     }

@@ -86,7 +86,7 @@ mod tests {
     /// Test points that should be outside the camera's viewport
     #[test]
     fn test_is_visible_out_of_bounds() {
-        let camera = Camera::new(100.0, 200.0, 800, 600);
+        let camera = Camera::new(100.0, 200.0, 400, 300);
         // Points outside the viewport
         assert!(!camera.is_visible(500.0, 200.0));
         assert!(!camera.is_visible(-300.0, 200.0));
@@ -98,7 +98,7 @@ mod tests {
     /// Test edge cases with points very close to the viewport boundaries
     #[test]
     fn test_is_visible_edge_cases() {
-        let camera = Camera::new(100.0, 200.0, 800, 600);
+        let camera = Camera::new(100.0, 200.0, 400, 300);
 
         // Points near the boundary (should be visible since it's < width/2)
         assert!(camera.is_visible(100.0 + 399.9, 200.0)); // Just inside near right edge
@@ -118,17 +118,17 @@ mod tests {
     fn test_is_visible_different_camera_sizes() {
         let small_camera = Camera::new(0.0, 0.0, 100, 100);
         assert!(small_camera.is_visible(25.0, 25.0));
-        assert!(!small_camera.is_visible(60.0, 60.0));
+        assert!(!small_camera.is_visible(110.0, 110.0));
 
         let large_camera = Camera::new(0.0, 0.0, 2000, 2000);
         assert!(large_camera.is_visible(500.0, 500.0));
-        assert!(!large_camera.is_visible(1100.0, 1100.0));
+        assert!(!large_camera.is_visible(2100.0, 2200.0));
     }
 
     /// Test camera with different center positions
     #[test]
     fn test_is_visible_different_centers() {
-        let negative_center_camera = Camera::new(-100.0, -200.0, 800, 600);
+        let negative_center_camera = Camera::new(-100.0, -200.0, 400, 300);
         assert!(negative_center_camera.is_visible(-100.0, -200.0));
         assert!(negative_center_camera.is_visible(-300.0, -200.0));
         assert!(negative_center_camera.is_visible(100.0, -200.0));

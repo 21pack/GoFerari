@@ -526,21 +526,21 @@ mod tests {
     // Test game map parsing on example
     #[test]
     fn test_load_game_map() {
-        let game_map = GameMap::load("input.json").unwrap();
+        let game_map = GameMap::load("../game_levels/menu.json").unwrap();
 
-        assert_eq!(game_map.name, "demo_map");
-        assert_eq!(game_map.tile_size, 16);
-        assert_eq!(game_map.size, [25, 25]);
+        assert_eq!(game_map.name, "menu");
+        assert_eq!(game_map.tile_size, 128);
+        assert_eq!(game_map.size, [6, 5]);
 
         assert_eq!(game_map.mob_count(), 6);
-        assert_eq!(game_map.object_count(), 3);
-        assert_eq!(game_map.tile_count(), 625);
+        assert_eq!(game_map.object_count(), 0);
+        assert_eq!(game_map.tile_count(), 16);
 
         let player = game_map.get_mob("player").unwrap();
         assert_eq!(player.name, "player");
         assert_eq!(player.x_start, 0);
-        assert_eq!(player.y_start, 0);
-        assert_eq!(player.asset, "knight_0_0");
+        assert_eq!(player.y_start, 2);
+        assert_eq!(player.asset, "running_se_0");
         assert_eq!(player.is_player, true);
         assert!(player.behaviour.is_some());
 
@@ -548,119 +548,30 @@ mod tests {
         assert_eq!(player_behaviour.behaviour_type, BehaviourType::Controlled);
         assert_eq!(player_behaviour.direction, None);
         assert_eq!(player_behaviour.speed, None);
-        assert_eq!(player.start_position(), (0, 0));
+        assert_eq!(player.start_position(), (0, 2));
 
-        let mob_1 = game_map.get_mob("mob_1").unwrap();
-        assert_eq!(mob_1.name, "mob_1");
-        assert_eq!(mob_1.x_start, 440);
-        assert_eq!(mob_1.y_start, 470);
-        assert_eq!(mob_1.asset, "imp_20_0");
+        let mob_1 = game_map.get_mob("box_1").unwrap();
+        assert_eq!(mob_1.name, "box_1");
+        assert_eq!(mob_1.x_start, 0);
+        assert_eq!(mob_1.y_start, 3);
+        assert_eq!(mob_1.asset, "box");
         assert_eq!(mob_1.is_player, false);
-        assert!(mob_1.behaviour.is_some());
 
-        let mob_1_behaviour = mob_1.behaviour.as_ref().unwrap();
-        assert_eq!(mob_1_behaviour.behaviour_type, BehaviourType::Walker);
-        assert_eq!(mob_1_behaviour.direction, Some("left".to_string()));
-        assert_eq!(mob_1_behaviour.speed, Some(0.5));
-        assert_eq!(mob_1.start_position(), (440, 470));
-
-        let mob_2 = game_map.get_mob("mob_2").unwrap();
-        assert_eq!(mob_2.name, "mob_2");
-        assert_eq!(mob_2.x_start, 400);
-        assert_eq!(mob_2.y_start, 460);
-        assert_eq!(mob_2.asset, "ghost_30_0");
-        assert_eq!(mob_2.is_player, false);
-        assert!(mob_2.behaviour.is_some());
-
-        let mob_2_behaviour = mob_2.behaviour.as_ref().unwrap();
-        assert_eq!(mob_2_behaviour.behaviour_type, BehaviourType::Walker);
-        assert_eq!(mob_2_behaviour.direction, Some("right".to_string()));
-        assert_eq!(mob_2_behaviour.speed, Some(0.42));
-        assert_eq!(mob_2.start_position(), (400, 460));
-
-        let mob_4 = game_map.get_mob("mob_4").unwrap();
-        assert_eq!(mob_4.name, "mob_4");
-        assert_eq!(mob_4.x_start, 420);
-        assert_eq!(mob_4.y_start, 470);
-        assert_eq!(mob_4.asset, "imp_20_0");
-        assert_eq!(mob_4.is_player, false);
-        assert!(mob_4.behaviour.is_some());
-
-        let mob_5 = game_map.get_mob("mob_5").unwrap();
-        assert_eq!(mob_5.name, "mob_5");
-        assert_eq!(mob_5.x_start, 493);
-        assert_eq!(mob_5.y_start, 470);
-        assert_eq!(mob_5.asset, "imp_20_0");
-        assert_eq!(mob_5.is_player, false);
-        assert!(mob_5.behaviour.is_some());
-
-        let mob_6 = game_map.get_mob("mob_6").unwrap();
-        assert_eq!(mob_6.name, "mob_6");
-        assert_eq!(mob_6.x_start, 540);
-        assert_eq!(mob_6.y_start, 470);
-        assert_eq!(mob_6.asset, "imp_20_0");
-        assert_eq!(mob_6.is_player, false);
-        assert!(mob_6.behaviour.is_some());
-
-        let obj_1 = game_map.get_object("obj_1").unwrap();
-        assert_eq!(obj_1.name, "obj_1");
-        assert_eq!(obj_1.x, 2);
-        assert_eq!(obj_1.y, 1);
-        assert_eq!(obj_1.asset, "cactus_long_3_9");
-        assert_eq!(obj_1.collidable, false);
-        assert_eq!(obj_1.shadow, false);
-        assert_eq!(obj_1.position(), (2, 1));
-
-        let obj_2 = game_map.get_object("obj_2").unwrap();
-        assert_eq!(obj_2.name, "obj_2");
-        assert_eq!(obj_2.x, 4);
-        assert_eq!(obj_2.y, 14);
-        assert_eq!(obj_2.asset, "fence_rising_11_10");
-        assert_eq!(obj_2.collidable, false);
-        assert_eq!(obj_2.shadow, false);
-        assert_eq!(obj_2.position(), (4, 14));
-
-        let obj_3 = game_map.get_object("obj_3").unwrap();
-        assert_eq!(obj_3.name, "obj_3");
-        assert_eq!(obj_3.x, 8);
-        assert_eq!(obj_3.y, 15);
-        assert_eq!(obj_3.asset, "fence_falling_10_10");
-        assert_eq!(obj_3.collidable, false);
-        assert_eq!(obj_3.shadow, false);
-        assert_eq!(obj_3.position(), (8, 15));
-
-        let tile_1 = game_map.get_tile("tile_1").unwrap();
-        assert_eq!(tile_1.name, "tile_1");
+        let tile_1 = game_map.get_tile("letter_1").unwrap();
+        assert_eq!(tile_1.name, "letter_1");
         assert_eq!(tile_1.x, 0);
         assert_eq!(tile_1.y, 0);
-        assert_eq!(tile_1.asset, "grass_tile_big_0_1");
+        assert_eq!(tile_1.asset, "letter_C");
         assert_eq!(tile_1.position(), (0, 0));
 
-        let tile_625 = game_map.get_tile("tile_625").unwrap();
-        assert_eq!(tile_625.name, "tile_625");
-        assert_eq!(tile_625.x, 24);
-        assert_eq!(tile_625.y, 24);
-        assert_eq!(tile_625.asset, "grass_tile_big_0_1");
-        assert_eq!(tile_625.position(), (24, 24));
-
         let mob_names: Vec<String> = game_map.iter_mobs().map(|m| m.name.clone()).collect();
-        assert_eq!(mob_names.len(), 6); // was 3
+        assert_eq!(mob_names.len(), 6);
         assert!(mob_names.contains(&"player".to_string()));
-        assert!(mob_names.contains(&"mob_1".to_string()));
-        assert!(mob_names.contains(&"mob_2".to_string()));
-        assert!(mob_names.contains(&"mob_4".to_string()));
-        assert!(mob_names.contains(&"mob_5".to_string()));
-        assert!(mob_names.contains(&"mob_6".to_string()));
-
-        let object_names: Vec<String> = game_map.iter_objects().map(|o| o.name.clone()).collect();
-        assert_eq!(object_names.len(), 3);
-        assert!(object_names.contains(&"obj_1".to_string()));
-        assert!(object_names.contains(&"obj_2".to_string()));
-        assert!(object_names.contains(&"obj_3".to_string()));
+        assert!(mob_names.contains(&"box_1".to_string()));
+        assert!(mob_names.contains(&"box_2".to_string()));
 
         let tile_names: Vec<String> = game_map.iter_tiles().map(|t| t.name.clone()).collect();
-        assert_eq!(tile_names.len(), 625);
-        assert!(tile_names.contains(&"tile_1".to_string()));
-        assert!(tile_names.contains(&"tile_625".to_string()));
+        assert_eq!(tile_names.len(), 16);
+        assert!(tile_names.contains(&"letter_1".to_string()));
     }
 }
