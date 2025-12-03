@@ -29,6 +29,8 @@ const POST_PUSH_DURATION: f32 = 0.50;
 const BOX_MOVE_DURATION: f32 = 1.25 / MOVEMENT_SPEEDUP;
 /// Duration of the player's pushing animation.
 const PUSH_DURATION: f32 = BOX_MOVE_DURATION;
+/// Offset between a box and the pushing player.
+const PUSH_OFFSET: f32 = 0.25;
 
 /// Computes the pixel offset (in isometric coordinates) for moving in a given direction by a specified magnitude.
 ///
@@ -325,7 +327,7 @@ fn apply_push_transition(
         box_unit.tile_x = b_tx;
         box_unit.tile_y = b_ty;
 
-        let (over_x, over_y) = get_offset(dx, dy, 0.5);
+        let (over_x, over_y) = get_offset(dx, dy, PUSH_OFFSET);
         let push_target_x = bx + over_x;
         let push_target_y = by + over_y;
 
@@ -431,7 +433,7 @@ fn start_pre_push_animation(
     (box_next_tx, box_next_ty): (i32, i32),
 ) {
     let (px, py) = (player.pixel_x, player.pixel_y);
-    let (offset_x, offset_y) = get_offset(dx, dy, 0.5);
+    let (offset_x, offset_y) = get_offset(dx, dy, PUSH_OFFSET);
     let mid_x = px + offset_x;
     let mid_y = py + offset_y;
 
