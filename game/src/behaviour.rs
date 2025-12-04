@@ -650,3 +650,172 @@ pub fn make_step(
 
     None
 }
+
+#[cfg(test)]
+mod offset_dir_tests {
+    use super::*;
+
+    #[test]
+    fn test_get_offset_southeast() {
+        let (offset_x, offset_y) = get_offset(1, 0, 1.0);
+
+        let tile_w = TILE_SIZE as f32;
+        let tile_h = (TILE_SIZE as f32) * 0.5;
+        let expected_x = tile_w * 0.5;
+        let expected_y = tile_h * 0.5;
+
+        assert_eq!(offset_x, expected_x);
+        assert_eq!(offset_y, expected_y);
+    }
+
+    #[test]
+    fn test_get_offset_northwest() {
+        let (offset_x, offset_y) = get_offset(-1, 0, 1.0);
+
+        let tile_w = TILE_SIZE as f32;
+        let tile_h = (TILE_SIZE as f32) * 0.5;
+        let expected_x = -tile_w * 0.5;
+        let expected_y = -tile_h * 0.5;
+
+        assert_eq!(offset_x, expected_x);
+        assert_eq!(offset_y, expected_y);
+    }
+
+    #[test]
+    fn test_get_dir_delta_ne() {
+        assert_eq!(get_dir_delta(Direction::NE), (0, -1));
+    }
+
+    #[test]
+    fn test_get_dir_delta_sw() {
+        assert_eq!(get_dir_delta(Direction::SW), (0, 1));
+    }
+
+    #[test]
+    fn test_get_dir_delta_all_directions() {
+        let test_cases = vec![
+            (Direction::SE, (1, 0)),
+            (Direction::NW, (-1, 0)),
+            (Direction::NE, (0, -1)),
+            (Direction::SW, (0, 1)),
+        ];
+
+        for (direction, expected) in test_cases {
+            assert_eq!(get_dir_delta(direction), expected);
+        }
+    }
+}
+
+#[cfg(test)]
+mod pre_push_tests {
+    use super::*;
+
+    #[test]
+    fn test_start_pre_push_animation_basic() {
+        let mut player = Unit {
+            pixel_x: 100.0,
+            pixel_y: 100.0,
+            tile_x: 5,
+            tile_y: 5,
+            x_speed: 0.0,
+            y_speed: 0.0,
+            movement: UnitMovement::Idle,
+            direction: Direction::SE,
+        };
+        let original_x = player.pixel_x;
+        let original_y = player.pixel_y;
+
+        let direction = (1, 0);
+        let box_idx = 42;
+        let player_next_tile = (6, 5);
+        let box_next_tile = (7, 5);
+
+        start_pre_push_animation(&mut player, direction, box_idx, player_next_tile, box_next_tile);
+
+        match &player.movement {
+            UnitMovement::PrePushing {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+                box_idx: actual_box_idx,
+                player_next_tx,
+                player_next_ty,
+                box_next_tx,
+                box_next_ty,
+                push_dx,
+                push_dy,
+            } => {
+                assert_eq!(*start_x, original_x);
+                assert_eq!(*start_y, original_y);
+
+                let (expected_offset_x, expected_offset_y) = get_offset(1, 0, PUSH_OFFSET);
+                assert_eq!(*target_x, original_x + expected_offset_x);
+                assert_eq!(*target_y, original_y + expected_offset_y);
+
+                assert_eq!(*elapsed_time, 0.0);
+                assert_eq!(*duration, PRE_PUSH_DURATION);
+
+                assert_eq!(*actual_box_idx, box_idx);
+                assert_eq!(*player_next_tx, player_next_tile.0);
+                assert_eq!(*player_next_ty, player_next_tile.1);
+                assert_eq!(*box_next_tx, box_next_tile.0);
+                assert_eq!(*box_next_ty, box_next_tile.1);
+                assert_eq!(*push_dx, direction.0);
+                assert_eq!(*push_dy, direction.1);
+            }
+            other => panic!("Expected PrePushing movement, got {:?}", other),
+        }
+
+        assert_eq!(player.pixel_x, original_x);
+        assert_eq!(player.pixel_y, original_y);
+    }
+}
+
+#[cfg(test)]
+mod post_push_tests {
+    use super::*;
+
+    #[test]
+    fn test_apply_post_push_transition() {
+        let mut player = Unit {
+            pixel_x: 0.0,
+            pixel_y: 0.0,
+            tile_x: 0,
+            tile_y: 0,
+            x_speed: 0.0,
+            y_speed: 0.0,
+            movement: UnitMovement::Idle,
+            direction: Direction::SE,
+        };
+
+        let start = (10.0, 20.0);
+        let target = (30.0, 40.0);
+
+        apply_post_push_transition(&mut player, start, target);
+
+        match &player.movement {
+            UnitMovement::PostPushing {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+            } => {
+                assert_eq!(*start_x, start.0);
+                assert_eq!(*start_y, start.1);
+                assert_eq!(*target_x, target.0);
+                assert_eq!(*target_y, target.1);
+
+                assert_eq!(*elapsed_time, 0.0);
+                assert_eq!(*duration, POST_PUSH_DURATION);
+            }
+            other => {
+                panic!("Expected PostPushing movement, got {:?}", other);
+            }
+        }
+    }
+}

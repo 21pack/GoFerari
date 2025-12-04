@@ -296,15 +296,14 @@ mod player_sprite_tests {
 
     #[test]
     fn test_get_player_sprite_running() {
+        let period = 45.0 * (1.0 / 1000.0);
         let dummy_player =
             DummyPlayer { movement: create_test_movement("moving"), direction: Direction::SE };
-
         let player = dummy_player.to_real_player();
 
         let sprite = get_player_sprite(&player, 0.0);
         assert_eq!(sprite, "running_se_0");
 
-        let period = 45.0 * (1.0 / 1000.0) as f64; // k = 1.0
         let sprite1 = get_player_sprite(&player, period * 13.0);
         assert_eq!(sprite1, "running_se_13");
 
@@ -317,15 +316,14 @@ mod player_sprite_tests {
 
     #[test]
     fn test_get_player_sprite_pushing() {
+        let period = 25.0 * (1.0 / 1000.0);
         let dummy_player =
             DummyPlayer { movement: create_test_movement("pushing"), direction: Direction::SE };
-
         let player = dummy_player.to_real_player();
 
         let sprite = get_player_sprite(&player, 0.0);
         assert_eq!(sprite, "pushing_se_0");
 
-        let period = 25.0 * (1.0 / 1000.0) as f64; // k = 1.0
         let sprite1 = get_player_sprite(&player, period * 1.0);
         assert_eq!(sprite1, "pushing_se_1");
 
