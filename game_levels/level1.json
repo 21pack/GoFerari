@@ -1,138 +1,135 @@
 {
-    "meta": {
-        "name": "level1",
-        "tile_size": 128,
-        "size": [
-            3,
-            6
-        ]
+  "meta": {
+    "name": "level1",
+    "tile_size": 128,
+    "size": [3, 6]
+  },
+  "tiles": {
+    "tile_1": {
+      "x": 0,
+      "y": 0,
+      "asset": "floor",
+      "tile_type": "empty"
     },
-    "tiles": {
-        "tile_1": {
-            "x": 0,
-            "y": 0,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_2": {
-            "x": 1,
-            "y": 0,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_3": {
-            "x": 2,
-            "y": 0,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_4": {
-            "x": 0,
-            "y": 1,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_5": {
-            "x": 1,
-            "y": 1,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_6": {
-            "x": 2,
-            "y": 1,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_7": {
-            "x": 0,
-            "y": 2,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_8": {
-            "x": 1,
-            "y": 2,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_9": {
-            "x": 2,
-            "y": 2,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_10": {
-            "x": 0,
-            "y": 3,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_11": {
-            "x": 1,
-            "y": 3,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_12": {
-            "x": 2,
-            "y": 3,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_13": {
-            "x": 0,
-            "y": 4,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_14": {
-            "x": 1,
-            "y": 4,
-            "asset": "target",
-            "tile_type": "target"
-        },
-        "tile_15": {
-            "x": 2,
-            "y": 4,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_16": {
-            "x": 0,
-            "y": 5,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_17": {
-            "x": 1,
-            "y": 5,
-            "asset": "floor",
-            "tile_type": "empty"
-        },
-        "tile_18": {
-            "x": 2,
-            "y": 5,
-            "asset": "floor",
-            "tile_type": "empty"
-        }
+    "tile_2": {
+      "x": 1,
+      "y": 0,
+      "asset": "floor",
+      "tile_type": "empty"
     },
-    "objects": {},
-    "mobs": {
-        "player": {
-            "x_start": 1,
-            "y_start": 0,
-            "asset": "idle_se_0",
-            "is_player": true,
-            "behaviour": {
-                "type": "controlled"
-            }
-        },
-        "box_1": {
-            "x_start": 1,
-            "y_start": 1,
-            "asset": "box",
-            "is_player": false
-        }
+    "tile_3": {
+      "x": 2,
+      "y": 0,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_4": {
+      "x": 0,
+      "y": 1,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_5": {
+      "x": 1,
+      "y": 1,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_6": {
+      "x": 2,
+      "y": 1,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_7": {
+      "x": 0,
+      "y": 2,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_8": {
+      "x": 1,
+      "y": 2,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_9": {
+      "x": 2,
+      "y": 2,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_10": {
+      "x": 0,
+      "y": 3,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_11": {
+      "x": 1,
+      "y": 3,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_12": {
+      "x": 2,
+      "y": 3,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_13": {
+      "x": 0,
+      "y": 4,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_14": {
+      "x": 1,
+      "y": 4,
+      "asset": "target",
+      "tile_type": "target"
+    },
+    "tile_15": {
+      "x": 2,
+      "y": 4,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_16": {
+      "x": 0,
+      "y": 5,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_17": {
+      "x": 1,
+      "y": 5,
+      "asset": "floor",
+      "tile_type": "empty"
+    },
+    "tile_18": {
+      "x": 2,
+      "y": 5,
+      "asset": "floor",
+      "tile_type": "empty"
     }
+  },
+  "objects": {},
+  "mobs": {
+    "player": {
+      "x_start": 1,
+      "y_start": 0,
+      "asset": "idle_se_0",
+      "is_player": true,
+      "behaviour": {
+        "type": "controlled"
+      }
+    },
+    "box_1": {
+      "x_start": 1,
+      "y_start": 1,
+      "asset": "box",
+      "is_player": false
+    }
+  }
 }
