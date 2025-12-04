@@ -46,7 +46,7 @@ jobs:
       run: cargo install cargo-tarpaulin
       
     - name: Generate coverage
-      run: cargo tarpaulin --verbose --workspace --out Lcov --output-dir ./coverage
+      run: cargo tarpaulin --verbose --workspace --out Lcov --output-dir ./coverage --exclude-files "game/src/main.rs"
       
     - name: Upload coverage
       uses: codecov/codecov-action@v3

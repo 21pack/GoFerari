@@ -707,6 +707,45 @@ mod offset_dir_tests {
 }
 
 #[cfg(test)]
+mod update_mod_tests {
+    use super::*;
+    use ferari::world::Direction;
+
+    fn create_test_mob_with_movement(movement: UnitMovement) -> Unit {
+        Unit {
+            pixel_x: 0.0,
+            pixel_y: 0.0,
+            tile_x: 0,
+            tile_y: 0,
+            x_speed: 10.0,
+            y_speed: 10.0,
+            movement,
+            direction: Direction::SE,
+        }
+    }
+
+    #[test]
+    fn test_update_mob_animations_single_mob_completion() {
+        let mut mobs = vec![create_test_mob_with_movement(UnitMovement::Moving {
+            start_x: 0.0,
+            start_y: 0.0,
+            target_x: 100.0,
+            target_y: 100.0,
+            elapsed_time: 0.5,
+            duration: 1.0,
+        })];
+
+        let delta = 0.6;
+
+        update_mob_animations(&mut mobs, delta);
+
+        assert!(matches!(mobs[0].movement, UnitMovement::Idle));
+        assert_eq!(mobs[0].pixel_x, 100.0);
+        assert_eq!(mobs[0].pixel_y, 100.0)
+    }
+}
+
+#[cfg(test)]
 mod pre_push_tests {
     use super::*;
 
@@ -717,8 +756,8 @@ mod pre_push_tests {
             pixel_y: 100.0,
             tile_x: 5,
             tile_y: 5,
-            x_speed: 0.0,
-            y_speed: 0.0,
+            x_speed: 10.0,
+            y_speed: 10.0,
             movement: UnitMovement::Idle,
             direction: Direction::SE,
         };
@@ -785,8 +824,8 @@ mod post_push_tests {
             pixel_y: 0.0,
             tile_x: 0,
             tile_y: 0,
-            x_speed: 0.0,
-            y_speed: 0.0,
+            x_speed: 10.0,
+            y_speed: 10.0,
             movement: UnitMovement::Idle,
             direction: Direction::SE,
         };
@@ -817,5 +856,383 @@ mod post_push_tests {
                 panic!("Expected PostPushing movement, got {:?}", other);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod push_tests {
+    use super::*;
+    use ferari::world::Player;
+
+    #[test]
+    fn test_apply_push_transition() {
+        let map_width = 10;
+        let player_tile = (5, 5);
+        let box_tile = (6, 5);
+
+        let mut state = State {
+            player: Player {
+                unit: Unit {
+                    pixel_x: 100.0,
+                    pixel_y: 100.0,
+                    tile_x: player_tile.0,
+                    tile_y: player_tile.1,
+                    movement: UnitMovement::Idle,
+                    direction: Direction::SE,
+                    x_speed: 10.0,
+                    y_speed: 10.0,
+                },
+            },
+            mobs: vec![
+                Unit {
+                    pixel_x: 164.0,
+                    pixel_y: 132.0,
+                    tile_x: box_tile.0,
+                    tile_y: box_tile.1,
+                    movement: UnitMovement::Idle,
+                    direction: Direction::SE,
+                    x_speed: 10.0,
+                    y_speed: 10.0,
+                },
+                Unit {
+                    pixel_x: 200.0,
+                    pixel_y: 200.0,
+                    tile_x: 7,
+                    tile_y: 5,
+                    movement: UnitMovement::Idle,
+                    direction: Direction::SE,
+                    x_speed: 10.0,
+                    y_speed: 10.0,
+                },
+            ],
+            mob_grid: vec![None; map_width * map_width],
+            ..State::default()
+        };
+
+        let box_idx = 0;
+        let direction = (1, 0);
+        let delta = 0.016;
+
+        let old_box_idx = box_tile.1 as usize * map_width + box_tile.1 as usize;
+        state.mob_grid[old_box_idx] = Some(0);
+
+        let original_player_pixel_x = state.player.unit.pixel_x;
+        let original_player_pixel_y = state.player.unit.pixel_y;
+        let original_box_pixel_x = state.mobs[0].pixel_x;
+        let original_box_pixel_y = state.mobs[0].pixel_y;
+
+        apply_push_transition(
+            &mut state,
+            box_idx,
+            player_tile,
+            box_tile,
+            direction,
+            map_width,
+            delta,
+        );
+
+        let new_box_idx = box_tile.1 as usize * map_width + box_tile.1 as usize + 1;
+        assert_eq!(state.mob_grid[old_box_idx], None);
+        assert_eq!(state.mob_grid[new_box_idx], Some(0));
+
+        match &state.mobs[0].movement {
+            UnitMovement::Moving {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+            } => {
+                assert_eq!(*start_x, original_box_pixel_x.round());
+                assert_eq!(*start_y, original_box_pixel_y.round());
+
+                let (offset_x, offset_y) = get_offset(1, 0, 1.0);
+                assert_eq!(*target_x, original_box_pixel_x.round() + offset_x);
+                assert_eq!(*target_y, original_box_pixel_y.round() + offset_y);
+
+                assert_eq!(*elapsed_time, 0.0 - delta);
+                assert_eq!(*duration, BOX_MOVE_DURATION);
+            }
+            other => panic!("Expected Moving movement, got {:?}", other),
+        }
+
+        assert_eq!(state.mobs[0].tile_x, box_tile.0);
+        assert_eq!(state.mobs[0].tile_y, box_tile.1);
+
+        match &state.player.unit.movement {
+            UnitMovement::Pushing {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+                recoil_target_x,
+                recoil_target_y,
+            } => {
+                assert_eq!(*start_x, original_player_pixel_x);
+                assert_eq!(*start_y, original_player_pixel_y);
+
+                let (push_offset_x, push_offset_y) = get_offset(1, 0, PUSH_OFFSET);
+                assert_eq!(*target_x, original_box_pixel_x.round() + push_offset_x);
+                assert_eq!(*target_y, original_box_pixel_y.round() + push_offset_y);
+
+                assert_eq!(*recoil_target_x, original_box_pixel_x.round());
+                assert_eq!(*recoil_target_y, original_box_pixel_y.round());
+
+                assert_eq!(*elapsed_time, 0.0);
+                assert_eq!(*duration, PUSH_DURATION);
+            }
+            other => panic!("Expected Pushing movement, got {:?}", other),
+        }
+
+        assert_eq!(state.player.unit.tile_x, player_tile.0);
+        assert_eq!(state.player.unit.tile_y, player_tile.1);
+
+        assert!(matches!(state.mobs[1].movement, UnitMovement::Idle));
+        assert_eq!(state.mobs[1].pixel_x, 200.0);
+        assert_eq!(state.mobs[1].pixel_y, 200.0);
+    }
+}
+
+#[cfg(test)]
+mod walking_tests {
+    use super::*;
+
+    #[test]
+    fn test_start_walking_animation() {
+        let next_tile = (6, 5);
+        let direction = (1, 0);
+
+        let mut player = Unit {
+            pixel_x: 100.0,
+            pixel_y: 100.0,
+            tile_x: next_tile.0 - 1,
+            tile_y: next_tile.1,
+            x_speed: 10.0,
+            y_speed: 10.0,
+            movement: UnitMovement::Idle,
+            direction: Direction::SE,
+        };
+
+        start_walking_animation(&mut player, direction, next_tile);
+
+        match &player.movement {
+            UnitMovement::Moving {
+                start_x,
+                start_y,
+                target_x,
+                target_y,
+                elapsed_time,
+                duration,
+            } => {
+                assert_eq!(*start_x, 100.0);
+                assert_eq!(*start_y, 100.0);
+
+                let (offset_x, offset_y) = get_offset(1, 0, 1.0);
+                assert_eq!(*target_x, 100.0 + offset_x);
+                assert_eq!(*target_y, 100.0 + offset_y);
+
+                assert_eq!(*elapsed_time, 0.0);
+                assert_eq!(*duration, MOVE_DURATION);
+            }
+            other => panic!("Expected Moving movement, got {:?}", other),
+        }
+
+        assert_eq!(player.tile_x, 6);
+        assert_eq!(player.tile_y, 5);
+
+        assert_eq!(player.pixel_x, 100.0);
+        assert_eq!(player.pixel_y, 100.0);
+    }
+}
+
+#[cfg(test)]
+mod update_player_tests {
+    use super::*;
+    use ferari::assets::GameMap;
+
+    fn create_test_map() -> GameMap {
+        GameMap::load("../game_levels/level1.json").unwrap()
+    }
+
+    fn create_unit_with_movement(movement: UnitMovement) -> Unit {
+        Unit {
+            pixel_x: 496.0,
+            pixel_y: 664.0,
+            tile_x: 1,
+            tile_y: 1,
+            x_speed: 10.0,
+            y_speed: 10.0,
+            movement,
+            direction: Direction::SW,
+        }
+    }
+
+    #[test]
+    fn test_update_player_animation_pre_pushing() {
+        let mut unit = create_unit_with_movement(UnitMovement::PrePushing {
+            start_x: 496.0,
+            start_y: 664.0,
+            target_x: 432.0,
+            target_y: 696.0,
+            elapsed_time: 0.8,
+            duration: 1.0,
+            box_idx: 0,
+            player_next_tx: 1,
+            player_next_ty: 2,
+            box_next_tx: 1,
+            box_next_ty: 3,
+            push_dx: 0,
+            push_dy: 1,
+        });
+
+        let delta = 0.3;
+        let input_state =
+            InputSnapshot { up: false, left: false, down: true, right: false, escape: false };
+
+        let game_map = create_test_map();
+        let map_width = game_map.size[0] as usize;
+        let mob_grid = vec![None; map_width * game_map.size[1] as usize];
+
+        let result = update_player_animation(
+            &mut unit,
+            delta,
+            &input_state,
+            &mob_grid,
+            &game_map,
+            map_width,
+        );
+
+        assert!(result.player_is_busy);
+
+        match result.transition_to_push {
+            Some((box_idx, p_tx, p_ty, b_tx, b_ty, dx, dy)) => {
+                assert_eq!(box_idx, 0);
+                assert_eq!(p_tx, 1);
+                assert_eq!(p_ty, 2);
+                assert_eq!(b_tx, 1);
+                assert_eq!(b_ty, 3);
+                assert_eq!(dx, 0);
+                assert_eq!(dy, 1);
+            }
+            None => panic!("Expected transition_to_push after PrePushing"),
+        }
+
+        assert_eq!(unit.pixel_x, 432.0);
+        assert_eq!(unit.pixel_y, 696.0);
+
+        assert!(result.transition_to_post.is_none());
+    }
+
+    #[test]
+    fn test_update_player_animation_pushing() {
+        let mut unit = create_unit_with_movement(UnitMovement::Pushing {
+            start_x: 496.0,
+            start_y: 664.0,
+            target_x: 432.0,
+            target_y: 696.0,
+            elapsed_time: 0.9,
+            duration: 1.0,
+            recoil_target_x: 496.0,
+            recoil_target_y: 664.0,
+        });
+
+        let delta = 0.2;
+        let input_state =
+            InputSnapshot { up: false, left: false, down: true, right: false, escape: false };
+
+        let game_map = create_test_map();
+        let map_width = game_map.size[0] as usize;
+        let mut mob_grid = vec![None; map_width * game_map.size[1] as usize];
+
+        let cur_box_idx = 2 * map_width + 1;
+        mob_grid[cur_box_idx] = Some(0);
+
+        let result = update_player_animation(
+            &mut unit,
+            delta,
+            &input_state,
+            &mob_grid,
+            &game_map,
+            map_width,
+        );
+
+        assert!(result.player_is_busy);
+
+        match result.transition_to_push {
+            Some((box_idx, p_tx, p_ty, b_tx, b_ty, dx, dy)) => {
+                assert_eq!(box_idx, 0);
+                assert_eq!(p_tx, 1);
+                assert_eq!(p_ty, 2);
+                assert_eq!(b_tx, 1);
+                assert_eq!(b_ty, 3);
+                assert_eq!(dx, 0);
+                assert_eq!(dy, 1);
+            }
+            None => panic!("Expected transition_to_push if enabled pushing"),
+        }
+
+        assert_eq!(unit.pixel_x, 432.0);
+        assert_eq!(unit.pixel_y, 696.0);
+
+        assert!(result.transition_to_post.is_none());
+    }
+}
+
+#[cfg(test)]
+mod make_step_tests {
+    use super::*;
+    use ferari::assets::GameMap;
+
+    fn create_test_map() -> GameMap {
+        GameMap::load("../game_levels/level2.json").unwrap()
+    }
+
+    #[test]
+    fn test_make_step_simple_walk() {
+        let game_map = create_test_map();
+        let mut state = State::new(&game_map);
+
+        let input_state =
+            InputSnapshot { up: false, left: false, down: false, right: true, escape: false };
+        let delta = 0.016;
+        let result = make_step(&mut state, &input_state, delta, &game_map);
+        assert!(result.is_none());
+
+        match &state.player.unit.movement {
+            UnitMovement::Moving { .. } => {}
+            other => panic!("Expected Moving movement, got {:?}", other),
+        }
+
+        assert_eq!(state.player.unit.direction, Direction::SE);
+        assert_eq!(state.player.unit.tile_x, 3);
+        assert_eq!(state.player.unit.tile_y, 3);
+    }
+
+    #[test]
+    fn test_make_step_push_box() {
+        let game_map = create_test_map();
+        let mut state = State::new(&game_map);
+
+        let map_width = game_map.size[0] as usize;
+        let box_front_idx = 1 * map_width + 2;
+        state.mob_grid[box_front_idx] = Some(0);
+
+        let input_state =
+            InputSnapshot { up: false, left: true, down: false, right: false, escape: false };
+        let delta = 0.016;
+        let result = make_step(&mut state, &input_state, delta, &game_map);
+        assert!(result.is_none());
+
+        match &state.player.unit.movement {
+            UnitMovement::PrePushing { .. } => {}
+            other => panic!("Expected PrePushing movement, got {:?}", other),
+        }
+
+        assert_eq!(state.player.unit.direction, Direction::NW);
+        assert_eq!(state.player.unit.tile_x, 2);
+        assert_eq!(state.player.unit.tile_y, 3);
     }
 }
