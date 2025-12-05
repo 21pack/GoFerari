@@ -44,8 +44,8 @@ impl Camera {
     ///
     /// `true` if the point is visible within the camera's viewport, `false` otherwise.
     pub fn is_visible(&self, x: f32, y: f32) -> bool {
-        ((self.center_x - x).abs() < (self.width as f32 * 2.0) / 2.0)
-            && ((self.center_y - y).abs() < (self.height as f32 * 2.0) / 2.0)
+        ((self.center_x - x).abs() < self.width as f32)
+            && ((self.center_y - y).abs() < self.height as f32)
     }
 }
 

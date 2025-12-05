@@ -6,6 +6,8 @@ Game on [Ferari](https://github.com/suvorovrain/Ferari) (Fast Engine for Renderi
 
 Currently, x86_64 Linux and ARM64 macOS platforms are supported.
 
+![demo](/demo.gif)
+
 ## Description
 
 An isometric game in puzzle genre such as [Sokoban](https://en.wikipedia.org/wiki/Sokoban). The aim of the game is to get the boxes onto storage locations.
