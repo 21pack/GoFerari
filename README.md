@@ -80,4 +80,15 @@ rustup-init
 
 ## License
 
+We use assets from the following packages:
+- Character:
+  - [8-directional melee character](https://hormelz.itch.io/8-directional-2d-businessman-character)
+- Boxes:
+  - [Isometric Crates Pack](https://screamingbrainstudios.itch.io/isometric-object-pack)
+- Floor:
+  - [Isometric miniature dungeon](https://kenney.nl/assets/isometric-miniature-dungeon)
+  - [Isometric Floor Tiles](https://screamingbrainstudios.itch.io/isotilepack)
+- Letters and numbers:
+  - [Isometric Letters, Numbers & Symbols Tile set 1](https://zrodfects.itch.io/32x32-isometric-letters-numbers-and-symbols-tile-set-1-starter-pack?download)
+
 Distributed under the [MIT License](https://choosealicense.com/licenses/mit/). See [`LICENSE`](LICENSE) for more information.
